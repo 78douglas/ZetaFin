@@ -1,0 +1,326 @@
+[
+  {
+    "data": "2025-07-01",
+    "tipo": "Pagamento",
+    "descricao": "Supermercado",
+    "categoria": "Alimentação",
+    "valor": 325.40,
+    "pago_por": "Ana",
+    "observacoes": "Compras semanais"
+  },
+  {
+    "data": "2025-07-02",
+    "tipo": "Recebimento",
+    "descricao": "Salário Ana",
+    "categoria": "Renda",
+    "valor": 4800.00,
+    "pago_por": "Ana",
+    "observacoes": "Salário mensal"
+  },
+  {
+    "data": "2025-07-03",
+    "tipo": "Recebimento",
+    "descricao": "Salário João",
+    "categoria": "Renda",
+    "valor": 5200.00,
+    "pago_por": "João",
+    "observacoes": "Salário mensal"
+  },
+  {
+    "data": "2025-07-04",
+    "tipo": "Pagamento",
+    "descricao": "Conta de luz",
+    "categoria": "Moradia",
+    "valor": 210.35,
+    "pago_por": "João",
+    "observacoes": "Conta compartilhada"
+  },
+  {
+    "data": "2025-07-06",
+    "tipo": "Pagamento",
+    "descricao": "Jantar fora",
+    "categoria": "Lazer",
+    "valor": 150.00,
+    "pago_por": "Ana",
+    "observacoes": "Restaurante"
+  },
+  {
+    "data": "2025-07-08",
+    "tipo": "Pagamento",
+    "descricao": "Gasolina",
+    "categoria": "Transporte",
+    "valor": 250.00,
+    "pago_por": "João",
+    "observacoes": "Abastecimento"
+  },
+  {
+    "data": "2025-07-10",
+    "tipo": "Pagamento",
+    "descricao": "Internet",
+    "categoria": "Moradia",
+    "valor": 120.00,
+    "pago_por": "Ana",
+    "observacoes": "Plano 300 Mbps"
+  },
+  {
+    "data": "2025-07-12",
+    "tipo": "Recebimento",
+    "descricao": "Venda de roupas usadas",
+    "categoria": "Renda extra",
+    "valor": 180.00,
+    "pago_por": "Ana",
+    "observacoes": "Brechó online"
+  },
+  {
+    "data": "2025-07-15",
+    "tipo": "Pagamento",
+    "descricao": "Farmácia",
+    "categoria": "Saúde",
+    "valor": 85.60,
+    "pago_por": "João",
+    "observacoes": "Remédio e vitaminas"
+  },
+  {
+    "data": "2025-07-20",
+    "tipo": "Pagamento",
+    "descricao": "Cinema",
+    "categoria": "Lazer",
+    "valor": 80.00,
+    "pago_por": "Ambos",
+    "observacoes": "Ingresso + pipoca"
+  },
+  {
+    "data": "2025-07-25",
+    "tipo": "Pagamento",
+    "descricao": "Mercado",
+    "categoria": "Alimentação",
+    "valor": 310.50,
+    "pago_por": "Ana",
+    "observacoes": "Compras mensais"
+  },
+  {
+    "data": "2025-07-30",
+    "tipo": "Pagamento",
+    "descricao": "Academia",
+    "categoria": "Saúde",
+    "valor": 220.00,
+    "pago_por": "João",
+    "observacoes": "Mensalidade"
+  },
+  {
+    "data": "2025-08-01",
+    "tipo": "Recebimento",
+    "descricao": "Salário Ana",
+    "categoria": "Renda",
+    "valor": 4800.00,
+    "pago_por": "Ana",
+    "observacoes": "Salário mensal"
+  },
+  {
+    "data": "2025-08-01",
+    "tipo": "Recebimento",
+    "descricao": "Salário João",
+    "categoria": "Renda",
+    "valor": 5200.00,
+    "pago_por": "João",
+    "observacoes": "Salário mensal"
+  },
+  {
+    "data": "2025-08-02",
+    "tipo": "Pagamento",
+    "descricao": "Supermercado",
+    "categoria": "Alimentação",
+    "valor": 340.90,
+    "pago_por": "Ana",
+    "observacoes": "Semana 1"
+  },
+  {
+    "data": "2025-08-05",
+    "tipo": "Pagamento",
+    "descricao": "Aluguel",
+    "categoria": "Moradia",
+    "valor": 2000.00,
+    "pago_por": "João",
+    "observacoes": "Depósito conjunto"
+  },
+  {
+    "data": "2025-08-07",
+    "tipo": "Pagamento",
+    "descricao": "Conta de energia",
+    "categoria": "Moradia",
+    "valor": 215.50,
+    "pago_por": "Ana",
+    "observacoes": "Julho/Agosto"
+  },
+  {
+    "data": "2025-08-10",
+    "tipo": "Pagamento",
+    "descricao": "Restaurante",
+    "categoria": "Lazer",
+    "valor": 180.00,
+    "pago_por": "João",
+    "observacoes": "Aniversário"
+  },
+  {
+    "data": "2025-08-13",
+    "tipo": "Pagamento",
+    "descricao": "Gasolina",
+    "categoria": "Transporte",
+    "valor": 260.00,
+    "pago_por": "João",
+    "observacoes": ""
+  },
+  {
+    "data": "2025-08-15",
+    "tipo": "Recebimento",
+    "descricao": "Cashback cartão",
+    "categoria": "Renda extra",
+    "valor": 35.00,
+    "pago_por": "Ana",
+    "observacoes": "App banco"
+  },
+  {
+    "data": "2025-08-18",
+    "tipo": "Pagamento",
+    "descricao": "Farmácia",
+    "categoria": "Saúde",
+    "valor": 120.00,
+    "pago_por": "Ana",
+    "observacoes": "Remédio"
+  },
+  {
+    "data": "2025-08-20",
+    "tipo": "Pagamento",
+    "descricao": "Cinema",
+    "categoria": "Lazer",
+    "valor": 75.00,
+    "pago_por": "Ambos",
+    "observacoes": ""
+  },
+  {
+    "data": "2025-08-23",
+    "tipo": "Pagamento",
+    "descricao": "Mercado",
+    "categoria": "Alimentação",
+    "valor": 310.00,
+    "pago_por": "Ana",
+    "observacoes": ""
+  },
+  {
+    "data": "2025-08-29",
+    "tipo": "Pagamento",
+    "descricao": "Internet",
+    "categoria": "Moradia",
+    "valor": 120.00,
+    "pago_por": "João",
+    "observacoes": ""
+  },
+  {
+    "data": "2025-09-01",
+    "tipo": "Recebimento",
+    "descricao": "Salário Ana",
+    "categoria": "Renda",
+    "valor": 4800.00,
+    "pago_por": "Ana",
+    "observacoes": "Salário mensal"
+  },
+  {
+    "data": "2025-09-01",
+    "tipo": "Recebimento",
+    "descricao": "Salário João",
+    "categoria": "Renda",
+    "valor": 5200.00,
+    "pago_por": "João",
+    "observacoes": "Salário mensal"
+  },
+  {
+    "data": "2025-09-02",
+    "tipo": "Pagamento",
+    "descricao": "Supermercado",
+    "categoria": "Alimentação",
+    "valor": 330.00,
+    "pago_por": "Ana",
+    "observacoes": "Semana 1"
+  },
+  {
+    "data": "2025-09-04",
+    "tipo": "Pagamento",
+    "descricao": "Aluguel",
+    "categoria": "Moradia",
+    "valor": 2000.00,
+    "pago_por": "João",
+    "observacoes": ""
+  },
+  {
+    "data": "2025-09-06",
+    "tipo": "Pagamento",
+    "descricao": "Gasolina",
+    "categoria": "Transporte",
+    "valor": 255.00,
+    "pago_por": "João",
+    "observacoes": ""
+  },
+  {
+    "data": "2025-09-09",
+    "tipo": "Pagamento",
+    "descricao": "Conta de energia",
+    "categoria": "Moradia",
+    "valor": 210.00,
+    "pago_por": "Ana",
+    "observacoes": ""
+  },
+  {
+    "data": "2025-09-12",
+    "tipo": "Pagamento",
+    "descricao": "Farmácia",
+    "categoria": "Saúde",
+    "valor": 95.00,
+    "pago_por": "Ana",
+    "observacoes": ""
+  },
+  {
+    "data": "2025-09-15",
+    "tipo": "Pagamento",
+    "descricao": "Restaurante",
+    "categoria": "Lazer",
+    "valor": 170.00,
+    "pago_por": "Ambos",
+    "observacoes": ""
+  },
+  {
+    "data": "2025-09-18",
+    "tipo": "Pagamento",
+    "descricao": "Internet",
+    "categoria": "Moradia",
+    "valor": 120.00,
+    "pago_por": "João",
+    "observacoes": ""
+  },
+  {
+    "data": "2025-09-20",
+    "tipo": "Recebimento",
+    "descricao": "Freelancer João",
+    "categoria": "Renda extra",
+    "valor": 1200.00,
+    "pago_por": "João",
+    "observacoes": "Projeto pontual"
+  },
+  {
+    "data": "2025-09-25",
+    "tipo": "Pagamento",
+    "descricao": "Mercado",
+    "categoria": "Alimentação",
+    "valor": 325.00,
+    "pago_por": "Ana",
+    "observacoes": ""
+  },
+  {
+    "data": "2025-09-29",
+    "tipo": "Pagamento",
+    "descricao": "Academia",
+    "categoria": "Saúde",
+    "valor": 220.00,
+    "pago_por": "João",
+    "observacoes": "Mensalidade"
+  }
+]
