@@ -2,7 +2,6 @@ import { useFinanceDataHybrid } from '@/react-app/hooks/useFinanceDataHybrid';
 import { useCategoriesHybrid } from '@/react-app/hooks/useFinanceDataHybrid';
 import BalanceCard from '@/react-app/components/BalanceCard';
 import ExpensesByCategory from '@/react-app/components/ExpensesByCategory';
-import BalanceEvolution from '@/react-app/components/BalanceEvolution';
 import { Receipt, Database } from 'lucide-react';
 import { Link } from 'react-router';
 import { toast } from 'sonner';
@@ -373,7 +372,6 @@ export default function Dashboard() {
       {/* Gráficos */}
       <div className="space-y-6">
         <ExpensesByCategory />
-        <BalanceEvolution />
       </div>
 
       

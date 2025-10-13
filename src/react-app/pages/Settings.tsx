@@ -13,7 +13,7 @@ export default function Settings() {
   const { theme, toggleTheme } = useTheme();
   const { isEditMode, toggleEditMode } = useEditMode();
   const { exportToCSV, exportToJSON, exportToPDF } = useExport();
-  const { insertFictitiousData, resetUserData, migrateLocalStorageData, checkLocalStorageData, loading: dbLoading, forceReset } = useDatabase();
+  const { insertFictitiousData, resetUserData, checkLocalStorageData, loading: dbLoading, forceReset } = useDatabase();
   const [showExportDropdown, setShowExportDropdown] = useState(false);
   const [showResetConfirmation, setShowResetConfirmation] = useState(false);
   const [resetConfirmationStep, setResetConfirmationStep] = useState(0);
@@ -45,260 +45,34 @@ export default function Settings() {
     }
     
     try {
-      // SISTEMA LIMPO - Aguardando novo arquivo JSON
-      console.log('⚠️ Sistema 100% limpo - nenhum dado fictício disponível para inserção');
-      toast.info('🎉 Sistema 100% limpo! Aguardando novo arquivo JSON com dados fictícios para inserção.');
-      return;
+      console.log('📥 Iniciando carregamento de dados do arquivo dados.json...');
       
-      // Dados JSON removidos - aguardando novo arquivo
-      const dadosJSON = [
-        {
-          "data": "2025-07-01",
-          "tipo": "Pagamento", 
-          "descricao": "Supermercado",
-          "categoria": "Alimentação",
-          "valor": 325.40,
-          "pago_por": "Ana",
-          "observacoes": "Compras semanais"
-        },
-        {
-          "data": "2025-07-02",
-          "tipo": "Recebimento",
-          "descricao": "Salário Ana",
-          "categoria": "Salário",
-          "valor": 4800.00,
-          "pago_por": "Ana",
-          "observacoes": "Salário mensal"
-        },
-        {
-          "data": "2025-07-03",
-          "tipo": "Recebimento",
-          "descricao": "Salário João",
-          "categoria": "Salário",
-          "valor": 5200.00,
-          "pago_por": "João",
-          "observacoes": "Salário mensal"
-        },
-        {
-          "data": "2025-07-05",
-          "tipo": "Pagamento",
-          "descricao": "Internet",
-          "categoria": "Contas",
-          "valor": 120.00,
-          "pago_por": "João",
-          "observacoes": "Conta mensal"
-        },
-        {
-          "data": "2025-07-08",
-          "tipo": "Pagamento",
-          "descricao": "Gasolina",
-          "categoria": "Transporte",
-          "valor": 180.50,
-          "pago_por": "Ana",
-          "observacoes": "Abastecimento"
-        },
-        {
-          "data": "2025-07-10",
-          "tipo": "Pagamento",
-          "descricao": "Farmácia",
-          "categoria": "Saúde",
-          "valor": 85.30,
-          "pago_por": "João",
-          "observacoes": "Medicamentos"
-        },
-        {
-          "data": "2025-07-12",
-          "tipo": "Pagamento",
-          "descricao": "Cinema",
-          "categoria": "Lazer",
-          "valor": 60.00,
-          "pago_por": "Ana",
-          "observacoes": "Filme em família"
-        },
-        {
-          "data": "2025-07-15",
-          "tipo": "Pagamento",
-          "descricao": "Supermercado",
-          "categoria": "Alimentação",
-          "valor": 280.75,
-          "pago_por": "João",
-          "observacoes": "Compras quinzenais"
-        },
-        {
-          "data": "2025-07-18",
-          "tipo": "Recebimento",
-          "descricao": "Freelance",
-          "categoria": "Freelance",
-          "valor": 1500.00,
-          "pago_por": "Ana",
-          "observacoes": "Projeto web"
-        },
-        {
-          "data": "2025-07-20",
-          "tipo": "Pagamento",
-          "descricao": "Restaurante",
-          "categoria": "Alimentação",
-          "valor": 95.50,
-          "pago_por": "João",
-          "observacoes": "Jantar romântico"
-        },
-        {
-          "data": "2025-07-22",
-          "tipo": "Pagamento",
-          "descricao": "Roupas",
-          "categoria": "Compras",
-          "valor": 250.00,
-          "pago_por": "Ana",
-          "observacoes": "Roupas de verão"
-        },
-        {
-          "data": "2025-07-25",
-          "tipo": "Pagamento",
-          "descricao": "Academia",
-          "categoria": "Saúde",
-          "valor": 120.00,
-          "pago_por": "João",
-          "observacoes": "Mensalidade"
-        },
-        {
-          "data": "2025-07-28",
-          "tipo": "Pagamento",
-          "descricao": "Supermercado",
-          "categoria": "Alimentação",
-          "valor": 310.20,
-          "pago_por": "Ana",
-          "observacoes": "Compras mensais"
-        },
-        {
-          "data": "2025-08-01",
-          "tipo": "Recebimento",
-          "descricao": "Salário Ana",
-          "categoria": "Salário",
-          "valor": 4800.00,
-          "pago_por": "Ana",
-          "observacoes": "Salário mensal"
-        },
-        {
-          "data": "2025-08-01",
-          "tipo": "Recebimento",
-          "descricao": "Salário João",
-          "categoria": "Salário",
-          "valor": 5200.00,
-          "pago_por": "João",
-          "observacoes": "Salário mensal"
-        },
-        {
-          "data": "2025-08-03",
-          "tipo": "Pagamento",
-          "descricao": "Aluguel",
-          "categoria": "Moradia",
-          "valor": 1200.00,
-          "pago_por": "João",
-          "observacoes": "Aluguel mensal"
-        },
-        {
-          "data": "2025-08-05",
-          "tipo": "Pagamento",
-          "descricao": "Conta de luz",
-          "categoria": "Contas",
-          "valor": 180.45,
-          "pago_por": "Ana",
-          "observacoes": "Conta mensal"
-        },
-        {
-          "data": "2025-08-08",
-          "tipo": "Pagamento",
-          "descricao": "Supermercado",
-          "categoria": "Alimentação",
-          "valor": 295.80,
-          "pago_por": "João",
-          "observacoes": "Compras semanais"
-        },
-        {
-          "data": "2025-08-10",
-          "tipo": "Recebimento",
-          "descricao": "Dividendos",
-          "categoria": "Investimentos",
-          "valor": 350.00,
-          "pago_por": "Ana",
-          "observacoes": "Rendimento investimentos"
-        },
-        {
-          "data": "2025-08-12",
-          "tipo": "Pagamento",
-          "descricao": "Gasolina",
-          "categoria": "Transporte",
-          "valor": 175.30,
-          "pago_por": "João",
-          "observacoes": "Abastecimento"
-        },
-        {
-          "data": "2025-08-15",
-          "tipo": "Pagamento",
-          "descricao": "Livros",
-          "categoria": "Educação",
-          "valor": 89.90,
-          "pago_por": "Ana",
-          "observacoes": "Livros técnicos"
-        },
-        {
-          "data": "2025-08-18",
-          "tipo": "Pagamento",
-          "descricao": "Streaming",
-          "categoria": "Lazer",
-          "valor": 45.90,
-          "pago_por": "João",
-          "observacoes": "Assinatura Netflix"
-        },
-        {
-          "data": "2025-08-20",
-          "tipo": "Pagamento",
-          "descricao": "Dentista",
-          "categoria": "Saúde",
-          "valor": 200.00,
-          "pago_por": "Ana",
-          "observacoes": "Consulta"
-        },
-        {
-          "data": "2025-08-22",
-          "tipo": "Pagamento",
-          "descricao": "Supermercado",
-          "categoria": "Alimentação",
-          "valor": 320.15,
-          "pago_por": "João",
-          "observacoes": "Compras quinzenais"
-        },
-        {
-          "data": "2025-08-25",
-          "tipo": "Recebimento",
-          "descricao": "Freelance",
-          "categoria": "Freelance",
-          "valor": 2200.00,
-          "pago_por": "João",
-          "observacoes": "Projeto mobile"
-        },
-        {
-          "data": "2025-08-28",
-          "tipo": "Pagamento",
-          "descricao": "Viagem",
-          "categoria": "Lazer",
-          "valor": 800.00,
-          "pago_por": "Ana",
-          "observacoes": "Fim de semana"
-        },
-        {
-          "data": "2025-08-31",
-          "tipo": "Pagamento",
-          "descricao": "Internet",
-          "categoria": "Contas",
-          "valor": 120.00,
-          "pago_por": "João",
-          "observacoes": "Conta mensal"
-        }
-      ];
+      // Tentar carregar o arquivo dados.json
+      const response = await fetch('/dados.json');
+      
+      if (!response.ok) {
+        throw new Error(`Erro ao carregar dados.json: ${response.status} ${response.statusText}`);
+      }
+      
+      const dadosJSON = await response.json();
+      
+      if (!Array.isArray(dadosJSON) || dadosJSON.length === 0) {
+        throw new Error('Arquivo dados.json está vazio ou não contém um array válido');
+      }
+      
+      console.log(`📊 ${dadosJSON.length} transações encontradas no arquivo dados.json`);
+      
+      // Verificar se já existem dados do JSON para evitar duplicação
+      const transacoesExistentes = JSON.parse(localStorage.getItem(STORAGE_KEYS.TRANSACTIONS) || '[]');
+      const jaExistemDadosJSON = transacoesExistentes.some(t => t.id && t.id.startsWith('json_'));
+      
+      if (jaExistemDadosJSON) {
+        toast.warning('⚠️ Dados do arquivo JSON já foram inseridos anteriormente. Use o botão Reset para limpar antes de inserir novamente.');
+        return;
+      }
 
-      // Mapeamento de categorias do JSON para IDs do sistema
-      const mapeamentoCategoria = {
+      // Mapeamento de nomes de categoria para IDs
+      const categoriaMap = {
         'Alimentação': '1',
         'Transporte': '2', 
         'Moradia': '3',
@@ -308,53 +82,62 @@ export default function Settings() {
         'Salário': '7',
         'Freelance': '8',
         'Investimentos': '9',
-        'Contas': '10',
-        'Compras': '11'
+        'Outros': '10'
       };
 
-      // Processar dados JSON
+      // Processar e converter dados para o formato do sistema
       const transacoesProcessadas = dadosJSON.map((item, index) => {
-        const tipo = item.tipo === 'Pagamento' ? 'DESPESA' : 'RECEITA';
-        const categoriaId = mapeamentoCategoria[item.categoria] || '12'; // Default para "Outros"
+        // Gerar ID único baseado no timestamp e índice
+        const id = `json_${Date.now()}_${index}`;
+        
+        // Mapear categoria nome para ID
+        const categoriaId = categoriaMap[item.categoria] || '10'; // Default para 'Outros'
         
         return {
-          id: `json-${Date.now()}-${index}`,
-          descricao: item.descricao,
-          valor: Math.abs(item.valor),
-          data: item.data,
-          tipo: tipo,
-          categoriaId: categoriaId,
-          registradoPor: item.pago_por || 'Sistema',
-          observacoes: item.observacoes || '',
-          criadoEm: new Date().toISOString(),
-          atualizadoEm: new Date().toISOString()
+          id,
+          descricao: item.descricao || 'Transação sem descrição',
+          valor: parseFloat(item.valor) || 0,
+          tipo: item.tipo === 'receita' ? 'RECEITA' : 'DESPESA', // Maiúsculo conforme esperado
+          categoria_id: categoriaId, // Usar categoria_id em vez de categoria
+          data: item.data || new Date().toISOString().split('T')[0],
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
         };
       });
-
-      // Obter transações existentes
-      const transacoesExistentes = JSON.parse(localStorage.getItem('zetafin_transacoes') || '[]');
       
-      // Combinar com as novas
+      // Combinar com as transações existentes
       const todasTransacoes = [...transacoesExistentes, ...transacoesProcessadas];
       
+      console.log('🔍 DEBUG: Transações processadas:', transacoesProcessadas.slice(0, 3)); // Mostrar primeiras 3
+      console.log('🔍 DEBUG: Total de transações após inserção:', todasTransacoes.length);
+      
       // Salvar no localStorage
-      localStorage.setItem('zetafin_transacoes', JSON.stringify(todasTransacoes));
+      localStorage.setItem(STORAGE_KEYS.TRANSACTIONS, JSON.stringify(todasTransacoes));
       
-      // Remover flag de inserção automática para permitir nova inserção manual
-      localStorage.removeItem('zetafin_dados_json_inseridos');
+      // Marcar que dados do JSON foram inseridos
+      localStorage.setItem('zetafin_dados_json_inseridos', 'true');
+      localStorage.setItem('dados_ficticios_inseridos', 'true');
       
-      console.log(`✅ ${transacoesProcessadas.length} transações fictícias inseridas com sucesso!`);
-      console.log(`📊 Total de transações no sistema: ${todasTransacoes.length}`);
+      console.log(`✅ ${transacoesProcessadas.length} transações do arquivo dados.json inseridas com sucesso!`);
+      toast.success(`✅ ${transacoesProcessadas.length} transações carregadas do arquivo dados.json com sucesso!`);
       
-      // Mostrar toast de sucesso
-      toast.success(`${transacoesProcessadas.length} transações fictícias inseridas com sucesso!`);
+      // Atualizar informações dos dados locais
+      const localData = checkLocalStorageData();
+      setLocalDataInfo(localData);
       
       // Recarregar a página para atualizar os dados
-      window.location.reload();
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
       
     } catch (error) {
-      console.error('❌ Erro ao inserir dados fictícios:', error);
-      toast.error('Erro ao inserir dados fictícios');
+      console.error('❌ Erro ao carregar dados do arquivo dados.json:', error);
+      
+      if (error.message.includes('404') || error.message.includes('Failed to fetch')) {
+        toast.error('❌ Arquivo dados.json não encontrado na raiz do projeto. Verifique se o arquivo existe.');
+      } else {
+        toast.error(`❌ Erro ao carregar dados: ${error.message}`);
+      }
     }
   };
 
@@ -476,18 +259,7 @@ export default function Settings() {
     setResetConfirmationStep(0);
   };
 
-  const handleMigrateLocalData = async () => {
-    try {
-      const result = await migrateLocalStorageData();
-      if (result.success) {
-        // Atualizar informações dos dados locais após migração
-        const localData = checkLocalStorageData();
-        setLocalDataInfo(localData);
-      }
-    } catch (error) {
-      console.error('Erro ao migrar dados locais:', error);
-    }
-  };
+
 
   const getAllTransactions = () => {
     return JSON.parse(localStorage.getItem(STORAGE_KEYS.TRANSACTIONS) || '[]');
@@ -640,38 +412,14 @@ export default function Settings() {
           </div>
           
           <div className="space-y-4">
-             {/* Migração de Dados Locais */}
-             {localDataInfo.hasLocalData && (
-               <div className="flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                 <div className="flex items-center space-x-3">
-                   <div>
-                     <p className="font-medium text-blue-700 dark:text-blue-300">Dados Locais Encontrados</p>
-                     <p className="text-sm text-blue-600 dark:text-blue-400">
-                       {localDataInfo.transactionCount} transações e {localDataInfo.categoryCount} categorias no navegador
-                     </p>
-                   </div>
-                 </div>
-                 <button
-                   onClick={handleMigrateLocalData}
-                   disabled={dbLoading}
-                   className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg transition-colors"
-                 >
-                   {dbLoading ? (
-                     <RefreshCw className="w-4 h-4 animate-spin" />
-                   ) : (
-                     <Upload className="w-4 h-4" />
-                   )}
-                   <span>{dbLoading ? 'Migrando...' : 'Migrar'}</span>
-                 </button>
-               </div>
-             )}
 
-             {/* Inserir Dados Fictícios */}
+
+             {/* Inserir Dados */}
              <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
               <div className="flex items-center space-x-3">
                 <div>
-                  <p className="font-medium text-gray-900 dark:text-gray-100">Dados Fictícios</p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Adiciona transações de exemplo dos últimos 3 meses</p>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">Inserir Dados</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Carrega transações do arquivo dados.json</p>
                 </div>
               </div>
               <button

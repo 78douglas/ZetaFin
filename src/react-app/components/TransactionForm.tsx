@@ -13,6 +13,8 @@ export default function TransactionForm({ transacaoId }: TransactionFormProps) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { categorias, adicionarTransacao, editarTransacao, obterTransacao, adicionarCategoria } = useFinanceDataHybrid();
+  
+
 
   const tipoParam = searchParams.get('tipo') as 'RECEITA' | 'DESPESA' | null;
   const isEditing = !!transacaoId;
@@ -55,7 +57,7 @@ export default function TransactionForm({ transacaoId }: TransactionFormProps) {
 
   // Filtrar categorias baseado no tipo
   const categoriasFiltradas = categorias.filter(categoria => 
-    categoria.tipoPadrao === 'AMBOS' || categoria.tipoPadrao === formData.tipo
+    categoria.tipo_padrao === 'AMBOS' || categoria.tipo_padrao === formData.tipo
   );
 
   const validateForm = () => {

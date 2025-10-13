@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 
 export default function Reports() {
-  const { loading, transacoes, obterCategoria } = useFinanceDataHybrid();
+  const { loading, transacoes, obterCategoria, estatisticas } = useFinanceDataHybrid();
   const navigate = useNavigate();
   const { exportToCSV, exportToJSON, exportToPDF } = useExport();
   const [showExportMenu, setShowExportMenu] = useState(false);
@@ -335,14 +335,31 @@ export default function Reports() {
       {/* Estatísticas Gerais - Mantendo para referência */}
       <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6">Estatísticas Gerais</h2>
-        <div className="grid grid-cols-2 gap-4">
-          <div className="text-center p-4 bg-blue-50 dark:bg-gray-700 rounded-lg">
-            <DollarSign className="w-8 h-8 text-blue-500 dark:text-blue-400 mx-auto mb-2" />
+        <div className="grid grid-cols-3 gap-4">
+          <div className="text-center p-4 bg-green-50 dark:bg-gray-700 rounded-lg">
+            <DollarSign className="w-8 h-8 text-green-500 dark:text-green-400 mx-auto mb-2" />
             <div className="text-lg font-bold text-gray-900 dark:text-gray-100">
-              {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(6719)}
+              {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(estatisticas?.totalReceitas || 0)}
+            </div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">Total Receitas</div>
+          </div>
+          <div className="text-center p-4 bg-red-50 dark:bg-gray-700 rounded-lg">
+            <DollarSign className="w-8 h-8 text-red-500 dark:text-red-400 mx-auto mb-2" />
+            <div className="text-lg font-bold text-gray-900 dark:text-gray-100">
+              {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(estatisticas?.totalDespesas || 0)}
+            </div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">Total Despesas</div>
+          </div>
+          <div className="text-center p-4 bg-blue-50 dark:bg-gray-700 rounded-lg">
+            <Wallet className="w-8 h-8 text-blue-500 dark:text-blue-400 mx-auto mb-2" />
+            <div className={`text-lg font-bold ${(estatisticas?.saldoTotal || 0) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+              {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(estatisticas?.saldoTotal || 0)}
             </div>
             <div className="text-sm text-gray-600 dark:text-gray-400">Saldo Total</div>
           </div>
+        </div>
+        
+        <div className="mt-4 grid grid-cols-1 gap-4">
           <div className="text-center p-4 bg-purple-50 dark:bg-gray-700 rounded-lg">
             <Receipt className="w-8 h-8 text-purple-500 dark:text-purple-400 mx-auto mb-2" />
             <div className="text-lg font-bold text-gray-900 dark:text-gray-100">{transacoes.length}</div>

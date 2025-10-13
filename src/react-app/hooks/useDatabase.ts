@@ -2,6 +2,7 @@ import { useState, useCallback, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import { toast } from 'sonner'
+import { APP_CONFIG } from '../lib/config'
 
 export const useDatabase = () => {
   const [loading, setLoading] = useState(false)
@@ -138,8 +139,8 @@ export const useDatabase = () => {
       setLoading(true)
       
       // Buscar dados do localStorage
-      const localTransactions = localStorage.getItem(STORAGE_KEYS.TRANSACTIONS)
-    const localCategories = localStorage.getItem(STORAGE_KEYS.CATEGORIES)
+      const localTransactions = localStorage.getItem(APP_CONFIG.STORAGE_KEYS.TRANSACTIONS)
+    const localCategories = localStorage.getItem(APP_CONFIG.STORAGE_KEYS.CATEGORIES)
       
       if (!localTransactions && !localCategories) {
         toast.info('Nenhum dado local encontrado para migrar')
@@ -228,8 +229,8 @@ export const useDatabase = () => {
         toast.success(`${migratedCount} itens migrados com sucesso!`)
         
         // Limpar localStorage após migração bem-sucedida
-        localStorage.removeItem(STORAGE_KEYS.TRANSACTIONS)
-      localStorage.removeItem(STORAGE_KEYS.CATEGORIES)
+        localStorage.removeItem(APP_CONFIG.STORAGE_KEYS.TRANSACTIONS)
+      localStorage.removeItem(APP_CONFIG.STORAGE_KEYS.CATEGORIES)
       } else {
         toast.info('Nenhum dado foi migrado')
       }
@@ -246,8 +247,8 @@ export const useDatabase = () => {
   }
 
   const checkLocalStorageData = () => {
-    const localTransactions = localStorage.getItem(STORAGE_KEYS.TRANSACTIONS)
-    const localCategories = localStorage.getItem(STORAGE_KEYS.CATEGORIES)
+    const localTransactions = localStorage.getItem(APP_CONFIG.STORAGE_KEYS.TRANSACTIONS)
+    const localCategories = localStorage.getItem(APP_CONFIG.STORAGE_KEYS.CATEGORIES)
     
     let transactionCount = 0
     let categoryCount = 0

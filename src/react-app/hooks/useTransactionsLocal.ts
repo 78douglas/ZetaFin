@@ -49,22 +49,32 @@ export const useTransactionsLocal = (filters?: TransactionFilters) => {
       if (stored) {
         try {
           allTransactions = JSON.parse(stored)
+          console.log('🔍 DEBUG useTransactionsLocal: Dados brutos do localStorage:', allTransactions.length)
+          
           // Garantir que é um array válido
           if (!Array.isArray(allTransactions)) {
             allTransactions = []
           }
           
           // Validar e corrigir dados das transações
+          const beforeFilter = allTransactions.length
           allTransactions = allTransactions.map(transaction => ({
             ...transaction,
             valor: Number(transaction.valor) || 0 // Garantir que valor seja um número
-          })).filter(transaction => 
-            transaction.id && 
-            transaction.descricao && 
-            transaction.data && 
-            transaction.tipo && 
-            transaction.categoria_id
-          )
+          })).filter(transaction => {
+            const isValid = transaction.id && 
+              transaction.descricao && 
+              transaction.data && 
+              transaction.tipo && 
+              transaction.categoria_id
+            
+            if (!isValid) {
+              console.log('🚫 DEBUG: Transação inválida filtrada:', transaction)
+            }
+            return isValid
+          })
+          
+          console.log(`🔍 DEBUG useTransactionsLocal: ${beforeFilter} → ${allTransactions.length} transações após filtro`)
         } catch (parseError) {
           console.error('Erro ao parsear transações do localStorage:', parseError)
           allTransactions = []
