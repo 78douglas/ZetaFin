@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teste Login Específico</title>
+</head>
+<body>
+    <h1>Teste de Login Específico</h1>
+    <p>Redirecionando para login...</p>
+    
+    <script>
+        console.log("=== TESTE LOGIN ESPECÍFICO ===");
+        
+        // Redirecionar para login
+        window.location.href = '/login';
+        
+        // Aguardar carregamento da página
+        setTimeout(() => {
+            console.log("Página carregada, procurando elementos...");
+            
+            // Buscar elementos específicos do formulário
+            const emailInput = document.querySelector('input[name="email"]');
+            const passwordInput = document.querySelector('input[name="password"]');
+            const submitButton = document.querySelector('button[type="submit"]');
+            const form = document.querySelector('form');
+            
+            console.log("Elementos encontrados:", {
+                emailInput: !!emailInput,
+                passwordInput: !!passwordInput,
+                submitButton: !!submitButton,
+                form: !!form
+            });
+            
+            if (emailInput && passwordInput && form) {
+                console.log("Preenchendo formulário...");
+                
+                // Limpar campos primeiro
+                emailInput.value = '';
+                passwordInput.value = '';
+                
+                // Preencher com dados de teste
+                emailInput.value = 'teste@email.com';
+                passwordInput.value = '123456';
+                
+                // Disparar eventos React
+                const inputEvent = new Event('input', { bubbles: true });
+                const changeEvent = new Event('change', { bubbles: true });
+                
+                emailInput.dispatchEvent(inputEvent);
+                emailInput.dispatchEvent(changeEvent);
+                passwordInput.dispatchEvent(inputEvent);
+                passwordInput.dispatchEvent(changeEvent);
+                
+                console.log("Formulário preenchido:", {
+                    email: emailInput.value,
+                    password: passwordInput.value ? '***' : 'vazio'
+                });
+                
+                // Aguardar e submeter
+                setTimeout(() => {
+                    console.log("Submetendo formulário...");
+                    
+                    // Tentar diferentes métodos de submit
+                    if (submitButton && !submitButton.disabled) {
+                        submitButton.click();
+                    } else if (form) {
+                        form.requestSubmit();
+                    }
+                    
+                    // Monitorar resultado
+                    setTimeout(() => {
+                        console.log("=== RESULTADO DO LOGIN ===");
+                        console.log("URL atual:", window.location.href);
+                        console.log("localStorage user:", localStorage.getItem("zetafin-local-user"));
+                        console.log("localStorage session:", localStorage.getItem("zetafin-local-session"));
+                        
+                        // Verificar se houve redirecionamento
+                        if (window.location.pathname !== '/login') {
+                            console.log("✅ Login bem-sucedido - redirecionado para:", window.location.pathname);
+                        } else {
+                            console.log("❌ Login falhou - ainda na página de login");
+                        }
+                    }, 5000);
+                    
+                }, 1000);
+                
+            } else {
+                console.error("❌ Elementos do formulário não encontrados!");
+                console.log("Todos os inputs:", document.querySelectorAll('input'));
+                console.log("Todos os buttons:", document.querySelectorAll('button'));
+                console.log("Todos os forms:", document.querySelectorAll('form'));
+            }
+            
+        }, 3000);
+    </script>
+</body>
+</html>

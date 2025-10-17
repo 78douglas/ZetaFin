@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simular Login</title>
+</head>
+<body>
+    <h1>Simulando Login...</h1>
+    <div id="status">Criando dados de usuário...</div>
+    
+    <script>
+        console.log('=== SIMULANDO LOGIN ===');
+        
+        // Criar dados de usuário e sessão como o AuthContext faz
+        const email = "teste@email.com";
+        
+        const mockUser = {
+          id: 'local-user-' + Date.now(),
+          email: email,
+          user_metadata: { 
+            full_name: email.split('@')[0],
+            avatar_url: null
+          },
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        
+        const mockSession = {
+          user: mockUser,
+          access_token: 'local-token-' + Date.now(),
+          refresh_token: 'local-refresh-' + Date.now(),
+          expires_at: Date.now() + (24 * 60 * 60 * 1000), // 24 horas
+          token_type: 'bearer'
+        };
+        
+        // Salvar no localStorage
+        localStorage.setItem('zetafin-local-user', JSON.stringify(mockUser));
+        localStorage.setItem('zetafin-local-session', JSON.stringify(mockSession));
+        
+        console.log('Dados de login salvos:', {
+          user: mockUser,
+          session: mockSession
+        });
+        
+        document.getElementById('status').innerHTML = 'Login simulado! Redire

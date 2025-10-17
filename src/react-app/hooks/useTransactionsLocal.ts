@@ -1,14 +1,16 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { APP_CONFIG } from '../lib/config'
-import { toast } from 'sonner'
+import { throttledErrorToast, throttledSuccessToast } from '../lib/notificationThrottle'
 
 export interface Transacao {
   id: string
   descricao: string
+  descricaoAdicional?: string
   valor: number
   data: string
   tipo: 'RECEITA' | 'DESPESA'
   categoria_id: string
+  tags?: string[]
   created_at?: string
   updated_at?: string
 }
@@ -22,120 +24,122 @@ export interface TransactionFilters {
 }
 
 export const useTransactionsLocal = (filters?: TransactionFilters) => {
-  console.log('🚀 DEBUG: useTransactionsLocal iniciado com filtros:', filters)
   const [transactions, setTransactions] = useState<Transacao[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  // Memoizar os filtros para evitar re-renderizações desnecessárias
-  const memoizedFilters = useMemo(() => filters, [
-    filters?.startDate,
-    filters?.endDate,
-    filters?.categoria_id,
-    filters?.tipo,
-    filters?.descricao
-  ])
-
-  const loadTransactions = useCallback(() => {
+  const loadTransactions = useCallback(async () => {
     try {
-      setLoading(true)
-      setError(null)
+      setLoading(true);
+      setError(null);
       
-      const storageKey = APP_CONFIG.STORAGE_KEYS.TRANSACTIONS
-      const stored = localStorage.getItem(storageKey)
+      const stored = localStorage.getItem(APP_CONFIG.STORAGE_KEYS.TRANSACTIONS);
+      console.log('🔍 DEBUG loadTransactions: stored data from localStorage:', stored);
       
-      let allTransactions: Transacao[] = []
-      
-      if (stored) {
-        try {
-          allTransactions = JSON.parse(stored)
-          console.log('🔍 DEBUG useTransactionsLocal: Dados brutos do localStorage:', allTransactions.length)
-          
-          // Garantir que é um array válido
-          if (!Array.isArray(allTransactions)) {
-            allTransactions = []
-          }
-          
-          // Validar e corrigir dados das transações
-          const beforeFilter = allTransactions.length
-          allTransactions = allTransactions.map(transaction => ({
-            ...transaction,
-            valor: Number(transaction.valor) || 0 // Garantir que valor seja um número
-          })).filter(transaction => {
-            const isValid = transaction.id && 
-              transaction.descricao && 
-              transaction.data && 
-              transaction.tipo && 
-              transaction.categoria_id
-            
-            if (!isValid) {
-              console.log('🚫 DEBUG: Transação inválida filtrada:', transaction)
-            }
-            return isValid
-          })
-          
-          console.log(`🔍 DEBUG useTransactionsLocal: ${beforeFilter} → ${allTransactions.length} transações após filtro`)
-        } catch (parseError) {
-          console.error('Erro ao parsear transações do localStorage:', parseError)
-          allTransactions = []
-        }
+      if (!stored) {
+        setTransactions([]);
+        return;
       }
+
+      const parsed = JSON.parse(stored);
+      console.log('🔍 DEBUG loadTransactions: parsed data:', parsed);
       
-      // Aplicar filtros se fornecidos
-      let filteredTransactions = allTransactions
+      if (!Array.isArray(parsed)) {
+        throw new Error('Dados de transações inválidos');
+      }
+
+      // Validar e filtrar transações válidas
+      const validTransactions = parsed.filter((t: any) => {
+        const isValid = t && 
+          typeof t.id === 'string' && 
+          typeof t.valor === 'number' && 
+          typeof t.categoria_id === 'string' && 
+          typeof t.tipo === 'string' && 
+          ['RECEITA', 'DESPESA'].includes(t.tipo);
+        
+        if (!isValid) {
+          console.warn('Transação inválida encontrada:', t);
+        }
+        
+        return isValid;
+      });
+
+      console.log('🔍 DEBUG loadTransactions: valid transactions count:', validTransactions.length);
+      console.log('🔍 DEBUG loadTransactions: valid transactions:', validTransactions);
+
+      // Aplicar filtros se existirem
+      let filteredTransactions = validTransactions;
       
-      if (memoizedFilters) {
-        filteredTransactions = allTransactions.filter(transaction => {
-          // Filtro por data de início
-          if (memoizedFilters.startDate && transaction.data < memoizedFilters.startDate) {
-            return false
-          }
-          
-          // Filtro por data de fim
-          if (memoizedFilters.endDate && transaction.data > memoizedFilters.endDate) {
-            return false
+      if (filters) {
+        filteredTransactions = validTransactions.filter(transaction => {
+          // Filtro por tipo
+          if (filters.tipo && transaction.tipo !== filters.tipo) {
+            return false;
           }
           
           // Filtro por categoria
-          if (memoizedFilters.categoria_id && transaction.categoria_id !== memoizedFilters.categoria_id) {
-            return false
+          if (filters.categoria_id && transaction.categoria_id !== filters.categoria_id) {
+            return false;
           }
           
-          // Filtro por tipo
-          if (memoizedFilters.tipo && transaction.tipo !== memoizedFilters.tipo) {
-            return false
+          // Filtro por data
+          if (filters.startDate || filters.endDate) {
+            const transactionDate = new Date(transaction.data);
+            
+            if (filters.startDate && transactionDate < new Date(filters.startDate)) {
+              return false;
+            }
+            
+            if (filters.endDate && transactionDate > new Date(filters.endDate)) {
+              return false;
+            }
           }
           
-          // Filtro por descrição
-          if (memoizedFilters.descricao && !transaction.descricao.toLowerCase().includes(memoizedFilters.descricao.toLowerCase())) {
-            return false
+          // Filtro por busca de texto
+          if (filters.descricao) {
+            const searchTerm = filters.descricao.toLowerCase();
+            const matchesDescription = transaction.descricao?.toLowerCase().includes(searchTerm);
+            const matchesTags = transaction.tags?.some((tag: string) => 
+              tag.toLowerCase().includes(searchTerm)
+            );
+            
+            if (!matchesDescription && !matchesTags) {
+              return false;
+            }
           }
           
-          return true
-        })
+          return true;
+        });
       }
-      
-      setTransactions(filteredTransactions)
-      setLoading(false)
-      
-      console.log(`✅ Carregadas ${filteredTransactions.length} transações (${allTransactions.length} total)`)
-    } catch (error) {
-      console.error('Erro ao carregar transações:', error)
-      setError('Erro ao carregar transações')
-      setLoading(false)
-    }
-  }, [memoizedFilters])
 
+      // Ordenar: mais recentes primeiro (por data desc; se igual, por created_at desc)
+      setTransactions(filteredTransactions.sort((a, b) => {
+        const dateA = a.data ? new Date(a.data).getTime() : 0;
+        const dateB = b.data ? new Date(b.data).getTime() : 0;
+        if (dateB !== dateA) return dateB - dateA;
+        const createdA = a.created_at ? new Date(a.created_at).getTime() : 0;
+        const createdB = b.created_at ? new Date(b.created_at).getTime() : 0;
+        return createdB - createdA;
+      }));
+    } catch (err) {
+      console.error('Erro ao carregar transações:', err);
+      setError(err instanceof Error ? err.message : 'Erro desconhecido');
+      setTransactions([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
   const saveTransactions = useCallback((newTransactions: Transacao[]) => {
     try {
       localStorage.setItem(APP_CONFIG.STORAGE_KEYS.TRANSACTIONS, JSON.stringify(newTransactions))
     } catch (err) {
       console.error('Erro ao salvar transações:', err)
-      toast.error('Erro ao salvar transações')
+      throttledErrorToast('Erro ao salvar transações', 'transaction-save-error')
     }
   }, [])
 
   const createTransaction = async (transacao: Omit<Transacao, 'id' | 'created_at' | 'updated_at'>) => {
+    console.log('🆕 createTransaction chamado com:', transacao)
     try {
       const newTransaction: Transacao = {
         ...transacao,
@@ -144,21 +148,28 @@ export const useTransactionsLocal = (filters?: TransactionFilters) => {
         updated_at: new Date().toISOString()
       }
 
+      console.log('🆕 Nova transação criada:', newTransaction)
+
       const stored = localStorage.getItem(APP_CONFIG.STORAGE_KEYS.TRANSACTIONS)
       const allTransactions: Transacao[] = stored ? JSON.parse(stored) : []
+      
+      console.log('🆕 Transações existentes:', allTransactions.length)
       
       allTransactions.push(newTransaction)
       saveTransactions(allTransactions)
       
+      console.log('🆕 Transação salva no localStorage')
+      
       // Recarregar transações para aplicar filtros
       loadTransactions()
       
-      toast.success('Transação criada com sucesso!')
+      console.log('🆕 Transações recarregadas')
+      
       return { data: newTransaction, error: null }
     } catch (err) {
       const errorMessage = 'Erro ao criar transação'
-      toast.error(errorMessage)
-      console.error('Erro ao criar transação:', err)
+      console.error('❌ Erro ao criar transação:', err)
+      throttledErrorToast(errorMessage, 'transaction-create-error')
       return { data: null, error: errorMessage }
     }
   }
@@ -185,11 +196,10 @@ export const useTransactionsLocal = (filters?: TransactionFilters) => {
       // Recarregar transações para aplicar filtros
       loadTransactions()
       
-      toast.success('Transação atualizada com sucesso!')
       return { data: updatedTransaction, error: null }
     } catch (err) {
       const errorMessage = 'Erro ao atualizar transação'
-      toast.error(errorMessage)
+      throttledErrorToast(errorMessage, 'transaction-update-error')
       console.error('Erro ao atualizar transação:', err)
       return { data: null, error: errorMessage }
     }
@@ -206,11 +216,11 @@ export const useTransactionsLocal = (filters?: TransactionFilters) => {
       // Recarregar transações para aplicar filtros
       loadTransactions()
       
-      toast.success('Transação removida com sucesso!')
+      throttledSuccessToast('Transação removida com sucesso!', 'transaction-delete-success')
       return { error: null }
     } catch (err) {
       const errorMessage = 'Erro ao remover transação'
-      toast.error(errorMessage)
+      throttledErrorToast(errorMessage, 'transaction-delete-error')
       console.error('Erro ao remover transação:', err)
       return { error: errorMessage }
     }
@@ -251,7 +261,7 @@ export const useTransactionsLocal = (filters?: TransactionFilters) => {
   // Carregar transações na inicialização
   useEffect(() => {
     loadTransactions()
-  }, [loadTransactions])
+  }, [])
 
   return {
     transactions,

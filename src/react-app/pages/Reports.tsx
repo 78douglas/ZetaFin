@@ -1,7 +1,8 @@
 import { useMemo, useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 import { useFinanceDataHybrid } from '@/react-app/hooks/useFinanceDataHybrid';
 import { useExport } from '@/react-app/contexts/ExportContext';
+import { DATE_UTILS } from '@/react-app/lib/config';
 import { 
   Calendar, 
   Clock, 
@@ -28,16 +29,17 @@ export default function Reports() {
   const exportMenuRef = useRef<HTMLDivElement>(null);
 
   const resumoRapido = useMemo(() => {
-    // Transações do mês atual (outubro 2024)
-    const inicioMes = new Date(2024, 9, 1); // Outubro 2024
-    const fimMes = new Date(2024, 9, 31);
+    // Transações dos últimos 3 meses (período dinâmico)
+    const hoje = new Date();
+    const inicioMes = new Date(DATE_UTILS.getMonthsAgo(2)); // 2 meses atrás
+    const fimMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0); // Final do mês atual
 
     const transacoesMesAtual = transacoes.filter(t => {
       const dataTransacao = new Date(t.data);
       return dataTransacao >= inicioMes && dataTransacao <= fimMes;
     });
 
-    // Categorias utilizadas no mês
+    // Categorias utilizadas no período
     const categoriasUtilizadas = new Set(transacoesMesAtual.map(t => t.categoriaId));
 
     // Orçamentos ativos (simulado - apps reais teriam orçamentos definidos)
@@ -69,7 +71,7 @@ export default function Reports() {
       id: transacao.id,
       description: transacao.descricao,
       amount: transacao.valor,
-      category: obterCategoria(transacao.categoriaId)?.nome || 'Sem categoria',
+      category: obterCategoria(transacao.categoria_id)?.nome || 'Sem categoria',
       date: transacao.data,
       type: transacao.tipo
     }));
@@ -82,7 +84,7 @@ export default function Reports() {
       id: transacao.id,
       description: transacao.descricao,
       amount: transacao.valor,
-      category: obterCategoria(transacao.categoriaId)?.nome || 'Sem categoria',
+      category: obterCategoria(transacao.categoria_id)?.nome || 'Sem categoria',
       date: transacao.data,
       type: transacao.tipo
     }));
@@ -95,7 +97,7 @@ export default function Reports() {
       id: transacao.id,
       description: transacao.descricao,
       amount: transacao.valor,
-      category: obterCategoria(transacao.categoriaId)?.nome || 'Sem categoria',
+      category: obterCategoria(transacao.categoria_id)?.nome || 'Sem categoria',
       date: transacao.data,
       type: transacao.tipo
     }));

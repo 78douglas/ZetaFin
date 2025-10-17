@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teste de Logout - Corrigido</title>
+</head>
+<body>
+    <h1>Testando Logout com Chaves Corretas...</h1>
+    <div id="status">Executando logout...</div>
+    
+    <script>
+        console.log('=== INICIANDO TESTE DE LOGOUT CORRIGIDO ===');
+        
+        // Verificar estado antes do logout
+        console.log('Estado antes do logout:');
+        const userBefore = localStorage.getItem('zetafin-local-user');
+        const sessionBefore = localStorage.getItem('zetafin-local-session');
+        const categoriesBefore = localStorage.getItem('zetafin_categories');
+        const transactionsBefore = localStorage.getItem('zetafin_transactions');
+        
+        console.log('- zetafin-local-user:', userBefore ? JSON.parse(userBefore).email : 'não existe');
+        console.log('- zetafin-local-session:', sessionBefore ? 'existe' : 'não existe');
+        console.log('- zetafin_categories:', categoriesBefore ? 'existe' : 'não existe');
+        console.log('- zetafin_transactions:', transactionsBefore ? 'existe' : 'não existe');
+        
+        // Simular logout limpando localStorage com as chaves corretas
+        console.log('Executando logout com chaves corretas...');
+        const keysToRemove = [
+          'zetafin-local-user',
+          'zetafin-local-session',
+          'zetafin_categories',
+          'zetafin_transactions',
+          'zetafin_edit_mode',
+          'sb-user'
+        ];
+        
+        keysToRemove.forEach(key => {
+          if (localStorage.getItem(key)) {
+            localStorage.removeItem(key);
+            console.log(`Removido: ${key}`);
+          }
+        });
+        
+        // Verificar estado após logout
+        console.log('Estado após logout:');
+        console.log('- zetafin-local-user:', localStorage.getItem('zetafin-local-user'));
+        console.log('- zetafin-local-session:', localStorage.getItem('zetafin-local-session'));
+        console.log('- zetafin_categories:', localStorage.getItem('zetafin_categories'));
+        console.log('- zetafin_transactions:', localStorage.getItem('zetafin_transactions'));
+        
+        document.getElementById('status').innerHTML = 'Logout executado com chaves corretas! Redirecionando...';
+        
+        // Redirecionar para login
+        setTimeout(() => {
+          window.location.href = '/login';
+        }, 2000);
+    </script>
+</body>
+</html>

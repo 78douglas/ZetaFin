@@ -1,24 +1,36 @@
 import { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Moon, Sun, Download, Info, Palette, Edit3, ChevronDown, FileText, Database, FileSpreadsheet, RefreshCw, Plus, Trash2, AlertTriangle, Upload } from 'lucide-react';
-import { Link } from 'react-router';
+import { ArrowLeft, Moon, Sun, Download, Info, Palette, Edit3, ChevronDown, FileText, Database, FileSpreadsheet, RefreshCw, Trash2, AlertTriangle, Upload, X } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useTheme } from '@/react-app/contexts/ThemeContext';
 import { useEditMode } from '@/react-app/contexts/EditModeContext';
 import { useExport } from '@/react-app/contexts/ExportContext';
 import { useDatabase } from '@/react-app/hooks/useDatabase';
+import { useAuth } from '@/react-app/contexts/AuthContext';
+import { useTransactionsHybrid } from '@/react-app/hooks/useFinanceDataHybrid';
+import { useCategoriesHybrid } from '@/react-app/hooks/useFinanceDataHybrid';
+import { supabase } from '@/react-app/lib/supabase';
 import { toast } from 'sonner';
 import { executeCompleteSystemCleanup, verifySystemIsClean, resetCategoriesToDefault } from '@/react-app/utils/cleanupSystem';
-import { STORAGE_KEYS } from '@/react-app/lib/config';
+import { STORAGE_KEYS, APP_CONFIG } from '@/react-app/lib/config';
 
 export default function Settings() {
   const { theme, toggleTheme } = useTheme();
   const { isEditMode, toggleEditMode } = useEditMode();
   const { exportToCSV, exportToJSON, exportToPDF } = useExport();
-  const { insertFictitiousData, resetUserData, checkLocalStorageData, loading: dbLoading, forceReset } = useDatabase();
+  const { resetUserData, checkLocalStorageData, loading: dbLoading, forceReset } = useDatabase();
+  const { user } = useAuth();
+  const { createTransaction } = useTransactionsHybrid();
+  const { categories, createCategory, getCategoryById } = useCategoriesHybrid();
   const [showExportDropdown, setShowExportDropdown] = useState(false);
   const [showResetConfirmation, setShowResetConfirmation] = useState(false);
   const [resetConfirmationStep, setResetConfirmationStep] = useState(0);
   const [localDataInfo, setLocalDataInfo] = useState({ hasLocalData: false, transactionCount: 0, categoryCount: 0 });
+  const [showCSVImportModal, setShowCSVImportModal] = useState(false);
+  const [csvFile, setCsvFile] = useState<File | null>(null);
+  const [isImporting, setIsImporting] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  
+  // Estados para gerenciamento de categorias removidos - funcionalidade movida para página dedicada
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -37,109 +49,9 @@ export default function Settings() {
     // Verificar dados locais ao carregar a página
     const localData = checkLocalStorageData();
     setLocalDataInfo(localData);
-  }, []); // Remover dependência para evitar loop infinito
+  }, []);
 
-  const handleInsertFictitiousData = async () => {
-    if (dbLoading) {
-      return; // Evitar múltiplas chamadas
-    }
-    
-    try {
-      console.log('📥 Iniciando carregamento de dados do arquivo dados.json...');
-      
-      // Tentar carregar o arquivo dados.json
-      const response = await fetch('/dados.json');
-      
-      if (!response.ok) {
-        throw new Error(`Erro ao carregar dados.json: ${response.status} ${response.statusText}`);
-      }
-      
-      const dadosJSON = await response.json();
-      
-      if (!Array.isArray(dadosJSON) || dadosJSON.length === 0) {
-        throw new Error('Arquivo dados.json está vazio ou não contém um array válido');
-      }
-      
-      console.log(`📊 ${dadosJSON.length} transações encontradas no arquivo dados.json`);
-      
-      // Verificar se já existem dados do JSON para evitar duplicação
-      const transacoesExistentes = JSON.parse(localStorage.getItem(STORAGE_KEYS.TRANSACTIONS) || '[]');
-      const jaExistemDadosJSON = transacoesExistentes.some(t => t.id && t.id.startsWith('json_'));
-      
-      if (jaExistemDadosJSON) {
-        toast.warning('⚠️ Dados do arquivo JSON já foram inseridos anteriormente. Use o botão Reset para limpar antes de inserir novamente.');
-        return;
-      }
 
-      // Mapeamento de nomes de categoria para IDs
-      const categoriaMap = {
-        'Alimentação': '1',
-        'Transporte': '2', 
-        'Moradia': '3',
-        'Saúde': '4',
-        'Educação': '5',
-        'Lazer': '6',
-        'Salário': '7',
-        'Freelance': '8',
-        'Investimentos': '9',
-        'Outros': '10'
-      };
-
-      // Processar e converter dados para o formato do sistema
-      const transacoesProcessadas = dadosJSON.map((item, index) => {
-        // Gerar ID único baseado no timestamp e índice
-        const id = `json_${Date.now()}_${index}`;
-        
-        // Mapear categoria nome para ID
-        const categoriaId = categoriaMap[item.categoria] || '10'; // Default para 'Outros'
-        
-        return {
-          id,
-          descricao: item.descricao || 'Transação sem descrição',
-          valor: parseFloat(item.valor) || 0,
-          tipo: item.tipo === 'receita' ? 'RECEITA' : 'DESPESA', // Maiúsculo conforme esperado
-          categoria_id: categoriaId, // Usar categoria_id em vez de categoria
-          data: item.data || new Date().toISOString().split('T')[0],
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        };
-      });
-      
-      // Combinar com as transações existentes
-      const todasTransacoes = [...transacoesExistentes, ...transacoesProcessadas];
-      
-      console.log('🔍 DEBUG: Transações processadas:', transacoesProcessadas.slice(0, 3)); // Mostrar primeiras 3
-      console.log('🔍 DEBUG: Total de transações após inserção:', todasTransacoes.length);
-      
-      // Salvar no localStorage
-      localStorage.setItem(STORAGE_KEYS.TRANSACTIONS, JSON.stringify(todasTransacoes));
-      
-      // Marcar que dados do JSON foram inseridos
-      localStorage.setItem('zetafin_dados_json_inseridos', 'true');
-      localStorage.setItem('dados_ficticios_inseridos', 'true');
-      
-      console.log(`✅ ${transacoesProcessadas.length} transações do arquivo dados.json inseridas com sucesso!`);
-      toast.success(`✅ ${transacoesProcessadas.length} transações carregadas do arquivo dados.json com sucesso!`);
-      
-      // Atualizar informações dos dados locais
-      const localData = checkLocalStorageData();
-      setLocalDataInfo(localData);
-      
-      // Recarregar a página para atualizar os dados
-      setTimeout(() => {
-        window.location.reload();
-      }, 1500);
-      
-    } catch (error) {
-      console.error('❌ Erro ao carregar dados do arquivo dados.json:', error);
-      
-      if (error.message.includes('404') || error.message.includes('Failed to fetch')) {
-        toast.error('❌ Arquivo dados.json não encontrado na raiz do projeto. Verifique se o arquivo existe.');
-      } else {
-        toast.error(`❌ Erro ao carregar dados: ${error.message}`);
-      }
-    }
-  };
 
   const handleResetDatabase = async () => {
     if (resetConfirmationStep === 0) {
@@ -158,24 +70,33 @@ export default function Settings() {
     }
 
     try {
-      console.log('🧹 INICIANDO LIMPEZA COMPLETA E TOTAL DO SISTEMA...');
+      console.log('🧹 INICIANDO RESET COMPLETO DO BANCO DE DADOS...');
       console.log('=' .repeat(80));
       
-      // 1. Executar limpeza completa usando o script especializado
-      console.log('📋 ETAPA 1: Limpeza completa do localStorage...');
+      // 1. Reset do banco de dados no Supabase
+      console.log('📋 ETAPA 1: Resetando dados no Supabase...');
+      const supabaseResult = await resetUserData();
+      
+      if (!supabaseResult.success) {
+        throw new Error(supabaseResult.error || 'Erro ao resetar dados no Supabase');
+      }
+      
+      console.log('✅ Dados do Supabase resetados com sucesso!');
+      console.log(`📊 Estatísticas: ${JSON.stringify(supabaseResult.data)}`);
+      
+      // 2. Limpeza do localStorage
+      console.log('📋 ETAPA 2: Limpeza completa do localStorage...');
       const cleanupResult = executeCompleteSystemCleanup();
       
-      // 2. Resetar categorias para as padrão (SEMPRE, independente do resultado)
-      console.log('📋 ETAPA 2: Resetando categorias para padrão...');
+      // 3. Resetar categorias para as padrão no localStorage
+      console.log('📋 ETAPA 3: Resetando categorias para padrão...');
       resetCategoriesToDefault();
       
-      // 3. Limpeza adicional manual de chaves específicas
-      console.log('📋 ETAPA 3: Limpeza adicional manual...');
+      // 4. Limpeza adicional manual de chaves específicas
+      console.log('📋 ETAPA 4: Limpeza adicional manual...');
       const additionalKeysToRemove = [
         'zetafin_transactions', 'zetafin_transacoes', 'zetafin-transactions',
-        'transactions', 'transacoes', 'dados_ficticios_inseridos',
-        'zetafin_dados_json_inseridos', 'auto_insert_executed',
-        'zetafin_auto_insert_executed', 'fictitious_data_inserted'
+        'transactions', 'transacoes'
       ];
       
       additionalKeysToRemove.forEach(key => {
@@ -189,11 +110,11 @@ export default function Settings() {
         }
       });
       
-      // 4. Verificação final rigorosa
-      console.log('📋 ETAPA 4: Verificação final...');
+      // 5. Verificação final rigorosa
+      console.log('📋 ETAPA 5: Verificação final...');
       const isClean = verifySystemIsClean();
       
-      // 5. Verificação adicional manual
+      // 6. Verificação adicional manual
       let allKeysClean = true;
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
@@ -202,8 +123,7 @@ export default function Settings() {
           key.includes('transaction') || 
           key.includes('transac') ||
           key.includes('categor') ||
-          key.includes('dados') ||
-          key.includes('ficticio')
+          key.includes('dados')
         )) {
           console.warn(`⚠️ Chave suspeita ainda presente: ${key}`);
           allKeysClean = false;
@@ -217,23 +137,30 @@ export default function Settings() {
         }
       }
       
-      // 6. Resultado final
-      const finalSuccess = cleanupResult.success && isClean && allKeysClean;
+      // 7. Resultado final
+      const finalSuccess = supabaseResult.success && cleanupResult.success && isClean && allKeysClean;
       
       console.log('=' .repeat(80));
-      console.log('🎯 RESULTADO FINAL DA LIMPEZA:');
-      console.log(`✅ Limpeza do script: ${cleanupResult.success ? 'SUCESSO' : 'FALHA'}`);
+      console.log('🎯 RESULTADO FINAL DO RESET:');
+      console.log(`✅ Reset do Supabase: ${supabaseResult.success ? 'SUCESSO' : 'FALHA'}`);
+      console.log(`✅ Limpeza do localStorage: ${cleanupResult.success ? 'SUCESSO' : 'FALHA'}`);
       console.log(`✅ Verificação do sistema: ${isClean ? 'LIMPO' : 'DADOS RESTANTES'}`);
       console.log(`✅ Verificação manual: ${allKeysClean ? 'LIMPO' : 'CHAVES SUSPEITAS'}`);
-      console.log(`🎯 STATUS GERAL: ${finalSuccess ? 'SISTEMA 100% LIMPO' : 'ATENÇÃO NECESSÁRIA'}`);
+      console.log(`🎯 STATUS GERAL: ${finalSuccess ? 'RESET 100% COMPLETO' : 'ATENÇÃO NECESSÁRIA'}`);
       console.log('=' .repeat(80));
       
       if (finalSuccess) {
-        console.log('🎉 LIMPEZA TOTAL CONCLUÍDA COM SUCESSO!');
-        toast.success(`🎉 Sistema 100% limpo! ${cleanupResult.itemsRemoved.length} itens removidos.`);
+        console.log('🎉 RESET COMPLETO CONCLUÍDO COM SUCESSO!');
+        const stats = supabaseResult.data;
+        toast.success(
+          `🎉 Reset completo realizado! ` +
+          `${stats?.deleted_transactions || 0} transações, ` +
+          `${stats?.deleted_goals || 0} metas e ` +
+          `${cleanupResult.itemsRemoved.length} itens locais removidos.`
+        );
       } else {
-        console.warn('⚠️ Limpeza concluída com avisos. Verifique o console.');
-        toast.warning('Limpeza concluída, mas alguns dados podem persistir. Verifique o console.');
+        console.warn('⚠️ Reset concluído com avisos. Verifique o console.');
+        toast.warning('Reset concluído, mas alguns dados podem persistir. Verifique o console.');
       }
       
       // Fechar modal
@@ -248,7 +175,7 @@ export default function Settings() {
       
     } catch (error) {
       console.error('❌ ERRO CRÍTICO ao resetar banco de dados:', error);
-      toast.error('Erro crítico ao resetar banco de dados');
+      toast.error(`Erro crítico ao resetar banco de dados: ${error.message}`);
       setShowResetConfirmation(false);
       setResetConfirmationStep(0);
     }
@@ -257,6 +184,176 @@ export default function Settings() {
   const cancelReset = () => {
     setShowResetConfirmation(false);
     setResetConfirmationStep(0);
+  };
+
+  const handleResetAndImportCSV = () => {
+    setShowCSVImportModal(true);
+  };
+
+  const handleCSVFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file && file.type === 'text/csv') {
+      setCsvFile(file);
+    } else {
+      toast.error('Por favor, selecione um arquivo CSV válido');
+      setCsvFile(null);
+    }
+  };
+
+  const parseCSVData = (csvText: string) => {
+    const lines = csvText.split('\n').filter(line => line.trim());
+    const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+    
+    console.log('📋 Headers encontrados:', headers);
+    
+    const transactions = [];
+    const categoryNames = new Set();
+    
+    for (let i = 1; i < lines.length; i++) {
+      const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
+      
+      if (values.length >= 6) {
+        // Novo formato: description,amount,type,transaction_date,notes,category_name
+        const [descricao, valor, tipo, data, notes, categoria] = values;
+        
+        // Adicionar categoria ao conjunto
+        categoryNames.add(categoria);
+        
+        // Criar transação
+        transactions.push({
+          transaction_date: data,
+          description: descricao,
+          category_name: categoria, // Será mapeado para category_id depois
+          type: tipo.toUpperCase() as 'RECEITA' | 'DESPESA',
+          amount: parseFloat(valor.replace('R$', '').replace(',', '.')),
+          notes: notes || null
+        });
+      }
+    }
+    
+    console.log('📊 Transações processadas:', transactions.length);
+    console.log('🏷️ Categorias encontradas:', Array.from(categoryNames));
+    
+    return { transactions, categoryNames: Array.from(categoryNames) };
+  };
+
+  const handleImportCSV = async () => {
+    if (!csvFile) {
+      toast.error('Selecione um arquivo CSV');
+      return;
+    }
+
+    if (!user) {
+      toast.error('Usuário não autenticado');
+      return;
+    }
+
+    setIsImporting(true);
+    
+    try {
+      // 1. Ler o arquivo CSV
+      console.log('📄 Lendo arquivo CSV...');
+      const csvText = await csvFile.text();
+      const { transactions, categoryNames } = parseCSVData(csvText);
+      
+      // 2. Primeiro, limpar todas as transações do usuário
+      console.log('🧹 Limpando transações existentes...');
+      const { error: deleteError } = await supabase
+        .from('transactions')
+        .delete()
+        .eq('user_id', user.id);
+      
+      if (deleteError) {
+        throw deleteError;
+      }
+      
+      // 3. Criar categorias que não existem
+      console.log('📂 Verificando categorias...');
+      const categoryMap = new Map();
+      
+      for (const categoryName of categoryNames) {
+        // Verificar se a categoria já existe
+        let existingCategory = categories.find(cat => 
+          cat.name.toLowerCase() === categoryName.toLowerCase()
+        );
+        
+        if (!existingCategory) {
+          // Criar nova categoria
+          console.log(`➕ Criando categoria: ${categoryName}`);
+          try {
+            const newCategory = await createCategory({
+              name: categoryName,
+              icon: '📝',
+              color: '#6366f1',
+              is_default: false
+            });
+            categoryMap.set(categoryName, newCategory.id);
+          } catch (err) {
+            console.error(`Erro ao criar categoria ${categoryName}:`, err);
+            // Se falhar, usar uma categoria padrão
+            if (categories.length > 0) {
+              categoryMap.set(categoryName, categories[0].id);
+            }
+          }
+        } else {
+          categoryMap.set(categoryName, existingCategory.id);
+        }
+      }
+      
+      // 4. Inserir transações
+      console.log('💰 Inserindo transações...');
+      let successCount = 0;
+      let errorCount = 0;
+      
+      for (const transaction of transactions) {
+        try {
+          const categoryId = categoryMap.get(transaction.category_name);
+          
+          await createTransaction({
+            description: transaction.description,
+            amount: transaction.amount,
+            type: transaction.type,
+            transaction_date: transaction.transaction_date,
+            notes: transaction.notes,
+            category_id: categoryId || null
+          });
+          
+          successCount++;
+        } catch (err) {
+          console.error('Erro ao inserir transação:', err);
+          errorCount++;
+        }
+      }
+      
+      console.log(`✅ Importação concluída: ${successCount} sucessos, ${errorCount} erros`);
+      
+      if (successCount > 0) {
+        toast.success(`✅ Importadas ${successCount} transações com sucesso!`);
+      }
+      
+      if (errorCount > 0) {
+        toast.warning(`⚠️ ${errorCount} transações falharam na importação`);
+      }
+      
+      // 5. Fechar modal e recarregar
+      setShowCSVImportModal(false);
+      setCsvFile(null);
+      
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
+      
+    } catch (error) {
+      console.error('❌ Erro ao importar CSV:', error);
+      toast.error('Erro ao importar arquivo CSV: ' + (error instanceof Error ? error.message : 'Erro desconhecido'));
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
+  const cancelCSVImport = () => {
+    setShowCSVImportModal(false);
+    setCsvFile(null);
   };
 
 
@@ -271,7 +368,6 @@ export default function Settings() {
       settings: {
         theme: localStorage.getItem(STORAGE_KEYS.THEME),
       },
-      coupleData: JSON.parse(localStorage.getItem(STORAGE_KEYS.COUPLE_DATA) || '{}'),
       exportDate: new Date().toISOString(),
       version: '1.0.0'
     };
@@ -399,6 +495,8 @@ export default function Settings() {
           </div>
         </div>
 
+        {/* Seção Gerenciar Categorias removida - funcionalidade movida para página dedicada */}
+
         {/* Gerenciar Banco de Dados */}
         <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
           <div className="flex items-center space-x-3 mb-4">
@@ -407,32 +505,34 @@ export default function Settings() {
             </div>
             <div>
               <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Gerenciar Banco de Dados</h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Adicione dados fictícios ou reset completo</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Importar dados ou reset completo</p>
             </div>
           </div>
           
           <div className="space-y-4">
 
 
-             {/* Inserir Dados */}
-             <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+             {/* Seção removida - inserção de dados fictícios não mais necessária com Supabase */}
+
+            {/* Zerar Tudo e Importar CSV */}
+            <div className="flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
               <div className="flex items-center space-x-3">
                 <div>
-                  <p className="font-medium text-gray-900 dark:text-gray-100">Inserir Dados</p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Carrega transações do arquivo dados.json</p>
+                  <p className="font-medium text-blue-700 dark:text-blue-300">Zerar Tudo e Importar CSV</p>
+                  <p className="text-sm text-blue-600 dark:text-blue-400">Remove todos os dados e importa de um arquivo CSV</p>
                 </div>
               </div>
               <button
-                onClick={handleInsertFictitiousData}
-                disabled={dbLoading}
-                className="flex items-center space-x-2 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white rounded-lg transition-colors"
+                onClick={handleResetAndImportCSV}
+                disabled={dbLoading || isImporting}
+                className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg transition-colors"
               >
-                {dbLoading ? (
+                {isImporting ? (
                   <RefreshCw className="w-4 h-4 animate-spin" />
                 ) : (
-                  <Plus className="w-4 h-4" />
+                  <Upload className="w-4 h-4" />
                 )}
-                <span>{dbLoading ? 'Inserindo...' : 'Inserir'}</span>
+                <span>{isImporting ? 'Importando...' : 'Importar CSV'}</span>
               </button>
             </div>
 
@@ -485,14 +585,39 @@ export default function Settings() {
             <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-md w-full mx-4 shadow-xl">
               <div className="flex items-center space-x-3 mb-4">
                 <div className="w-10 h-10 bg-red-100 dark:bg-red-900 rounded-lg flex items-center justify-center">
-                  <AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-400" />
+                  {dbLoading ? (
+                    <RefreshCw className="w-5 h-5 text-red-600 dark:text-red-400 animate-spin" />
+                  ) : (
+                    <AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-400" />
+                  )}
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                  {resetConfirmationStep === 1 ? 'Confirmar Reset' : 'Confirmação Final'}
+                  {dbLoading ? 'Resetando Banco de Dados...' : 
+                   resetConfirmationStep === 1 ? 'Confirmar Reset' : 'Confirmação Final'}
                 </h3>
               </div>
               
-              {resetConfirmationStep === 1 ? (
+              {dbLoading ? (
+                <div>
+                  <p className="text-gray-700 dark:text-gray-300 mb-4">
+                    Processando reset do banco de dados. Por favor, aguarde...
+                  </p>
+                  <div className="space-y-2 mb-6">
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                      • Resetando dados no Supabase
+                    </div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                      • Limpando dados locais
+                    </div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                      • Verificando sistema
+                    </div>
+                  </div>
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div className="bg-red-600 h-2 rounded-full animate-pulse" style={{width: '100%'}}></div>
+                  </div>
+                </div>
+              ) : resetConfirmationStep === 1 ? (
                 <div>
                   <p className="text-gray-700 dark:text-gray-300 mb-4">
                     Tem certeza que deseja resetar o banco de dados? Esta ação irá remover TODAS as transações, categorias e dados do usuário.
@@ -512,21 +637,22 @@ export default function Settings() {
                 </div>
               )}
               
-              <div className="flex space-x-3">
-                <button
-                  onClick={cancelReset}
-                  className="flex-1 px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
-                >
-                  Cancelar
-                </button>
-                <button
-                  onClick={handleResetDatabase}
-                  disabled={dbLoading}
-                  className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white rounded-lg transition-colors"
-                >
-                  {resetConfirmationStep === 1 ? 'Continuar' : 'Resetar Definitivamente'}
-                </button>
-              </div>
+              {!dbLoading && (
+                <div className="flex space-x-3">
+                  <button
+                    onClick={cancelReset}
+                    className="flex-1 px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={handleResetDatabase}
+                    className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                  >
+                    {resetConfirmationStep === 1 ? 'Continuar' : 'Resetar Definitivamente'}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -673,6 +799,102 @@ export default function Settings() {
           </div>
         </div>
       </div>
+
+      {/* Modal de Categoria removido - funcionalidade movida para página dedicada */}
+
+      {/* Modal de Importação CSV */}
+      {showCSVImportModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Zerar Tudo e Importar CSV
+              </h3>
+              <button
+                onClick={cancelCSVImport}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3">
+                <div className="flex items-start">
+                  <AlertTriangle className="w-5 h-5 text-yellow-600 dark:text-yellow-400 mt-0.5 mr-2 flex-shrink-0" />
+                  <div className="text-sm text-yellow-800 dark:text-yellow-200">
+                    <p className="font-medium mb-1">Atenção!</p>
+                    <p>Esta ação irá:</p>
+                    <ul className="list-disc list-inside mt-1 space-y-1">
+                      <li>Apagar TODOS os dados existentes</li>
+                      <li>Importar apenas os dados do CSV</li>
+                      <li>Recarregar a página automaticamente</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Selecionar arquivo CSV
+                </label>
+                <input
+                  type="file"
+                  accept=".csv"
+                  onChange={handleCSVFileChange}
+                  className="block w-full text-sm text-gray-500 dark:text-gray-400
+                    file:mr-4 file:py-2 file:px-4
+                    file:rounded-lg file:border-0
+                    file:text-sm file:font-medium
+                    file:bg-blue-50 file:text-blue-700
+                    hover:file:bg-blue-100
+                    dark:file:bg-blue-900/20 dark:file:text-blue-400
+                    dark:hover:file:bg-blue-900/30"
+                />
+                {csvFile && (
+                  <p className="mt-2 text-sm text-green-600 dark:text-green-400">
+                    Arquivo selecionado: {csvFile.name}
+                  </p>
+                )}
+              </div>
+
+              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
+                <div className="text-sm text-blue-800 dark:text-blue-200">
+                  <p className="font-medium mb-1">Formato esperado do CSV:</p>
+                  <p className="font-mono text-xs">data,tipo,categoria,descricao,valor</p>
+                  <p className="mt-1">Exemplo: 2025-08-01,DESPESA,Alimentação,Almoço,25.50</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={cancelCSVImport}
+                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleImportCSV}
+                disabled={!csvFile || isImporting}
+                className="flex-1 px-4 py-2 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 disabled:from-gray-400 disabled:to-gray-500 text-white rounded-lg transition-all duration-200 flex items-center justify-center gap-2"
+              >
+                {isImporting ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    Importando...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-4 h-4" />
+                    Zerar e Importar
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

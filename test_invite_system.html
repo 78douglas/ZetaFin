@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste do Sistema de Convites - ZetaFin</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        input {
+            padding: 8px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 300px;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-connected { background-color: #28a745; }
+        .status-disconnected { background-color: #dc3545; }
+        .status-reconnecting { background-color: #ffc107; }
+        .status-idle { background-color: #6c757d; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Teste do Sistema de Convites - ZetaFin</h1>
+    
+    <div class="test-section">
+        <h2>📋 Lista de Verificação das Funcionalidades</h2>
+        <div id="checklist">
+            <div class="test-result info">
+                <strong>Funcionalidades Implementadas:</strong>
+                <ul>
+                    <li>✅ Tabela invite_tokens criada no Supabase</li>
+                    <li>✅ Tabela connection_logs criada no Supabase</li>
+                    <li>✅ Hook useInviteTokens implementado</li>
+                    <li>✅ Hook useConnectionMonitor implementado</li>
+                    <li>✅ Hook useSessionPersistence implementado</li>
+                    <li>✅ Página InvitePage criada (/invite/:token)</li>
+                    <li>✅ CoupleData.tsx atualizada com funcionalidades de links</li>
+                    <li>✅ Indicadores visuais de status de conexão</li>
+                    <li>✅ Sistema de notificações toast</li>
+                    <li>✅ Compatibilidade com sistema atual de códigos</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔗 Teste de URLs de Convite</h2>
+        <p>Teste diferentes formatos de URL de convite:</p>
+        
+        <div>
+            <input type="text" id="inviteToken" placeholder="Digite um token de convite" value="test-token-123">
+            <button onclick="testInviteUrl()">Testar URL de Convite</button>
+        </div>
+        
+        <div id="inviteUrlResult"></div>
+        
+        <h3>URLs de Teste:</h3>
+        <ul>
+            <li><a href="http://localhost:5173/invite/test-token-123" target="_blank">http://localhost:5173/invite/test-token-123</a></li>
+            <li><a href="http://localhost:5173/invite/abc123def456" target="_blank">http://localhost:5173/invite/abc123def456</a></li>
+            <li><a href="http://localhost:5173/invite/expired-token" target="_blank">http://localhost:5173/invite/expired-token</a></li>
+        </ul>
+    </div>
+
+    <div class="test-section">
+        <h2>📱 Teste de Compartilhamento</h2>
+        <p>Teste os links de compartilhamento:</p>
+        
+        <button onclick="testWhatsAppShare()">Testar WhatsApp</button>
+        <button onclick="testEmailShare()">Testar Email</button>
+        <button onclick="testCopyLink()">Testar Copiar Link</button>
+        
+        <div id="shareResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔄 Teste de Status de Conexão</h2>
+        <p>Simule diferentes estados de conexão:</p>
+        
+        <div id="connectionStatus">
+            <span class="status-indicator status-idle"></span>
+            <span id="statusText">Idle</span>
+            <span id="latencyText"></span>
+        </div>
+        
+        <br><br>
+        
+        <button onclick="simulateConnectionStatus('connected')">Simular Conectado</button>
+        <button onclick="simulateConnectionStatus('disconnected')">Simular Desconectado</button>
+        <button onclick="simulateConnectionStatus('reconnecting')">Simular Reconectando</button>
+        <button onclick="simulateConnectionStatus('idle')">Simular Idle</button>
+        
+        <div id="connectionResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>💾 Teste de Persistência de Sessão</h2>
+        <p>Teste o armazenamento de dados de sessão:</p>
+        
+        <button onclick="testSessionStorage()">Testar localStorage</button>
+        <button onclick="testSessionStorageSession()">Testar sessionStorage</button>
+        <button onclick="testIndexedDB()">Testar IndexedDB</button>
+        <button onclick="clearAllStorage()">Limpar Todos os Dados</button>
+        
+        <div id="storageResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>🎯 Teste de Compatibilidade</h2>
+        <p>Verificar se o sistema atual de códigos de 6 caracteres ainda funciona:</p>
+        
+        <div>
+            <input type="text" id="connectionCode" placeholder="Digite um código de 6 caracteres" value="ABC123" maxlength="6">
+            <button onclick="testConnectionCode()">Testar Código</button>
+        </div>
+        
+        <div id="codeResult"></div>
+    </div>
+
+    <script>
+        // Função para testar URL de convite
+        function testInviteUrl() {
+            const token = document.getElementById('inviteToken').value;
+            const url = `http://localhost:5173/invite/${token}`;
+            
+            document.getElementById('inviteUrlResult').innerHTML = `
+                <div class="test-result info">
+                    <strong>URL Gerada:</strong> <a href="${url}" target="_blank">${url}</a>
+                    <br><strong>Status:</strong> URL válida - clique para testar
+                </div>
+            `;
+        }
+
+        // Função para testar compartilhamento WhatsApp
+        function testWhatsAppShare() {
+            const message = "Olá! Você foi convidado para conectar no ZetaFin. Use este link:";
+            const url = "http://localhost:5173/invite/test-token-123";
+            const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message + " " + url)}`;
+            
+            document.getElementById('shareResult').innerHTML = `
+                <div class="test-result success">
+                    <strong>WhatsApp URL:</strong> <a href="${whatsappUrl}" target="_blank">Abrir WhatsApp</a>
+                </div>
+            `;
+        }
+
+        // Função para testar compartilhamento por email
+        function testEmailShare() {
+            const subject = "Convite para conectar no ZetaFin";
+            const body = "Olá! Você foi convidado para conectar no ZetaFin. Use este link: http://localhost:5173/invite/test-token-123";
+            const emailUrl = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            
+            document.getElementById('shareResult').innerHTML = `
+                <div class="test-result success">
+                    <strong>Email URL:</strong> <a href="${emailUrl}">Abrir Cliente de Email</a>
+                </div>
+            `;
+        }
+
+        // Função para testar copiar link
+        function testCopyLink() {
+            const url = "http://localhost:5173/invite/test-token-123";
+            
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(url).then(() => {
+                    document.getElementById('shareResult').innerHTML = `
+                        <div class="test-result success">
+                            <strong>Link copiado:</strong> ${url}
+                        </div>
+                    `;
+                }).catch(() => {
+                    document.getElementById('shareResult').innerHTML = `
+                        <div class="test-result error">
+                            <strong>Erro:</strong> Não foi possível copiar o link
+                        </div>
+                    `;
+                });
+            } else {
+                document.getElementById('shareResult').innerHTML = `
+                    <div class="test-result error">
+                        <strong>Erro:</strong> Clipboard API não suportada
+                    </div>
+                `;
+            }
+        }
+
+        // Função para simular status de conexão
+        function simulateConnectionStatus(status) {
+            const indicator = document.querySelector('.status-indicator');
+            const statusText = document.getElementById('statusText');
+            const latencyText = document.getElementById('latencyText');
+            
+            // Remover classes anteriores
+            indicator.className = 'status-indicator';
+            
+            switch(status) {
+                case 'connected':
+                    indicator.classList.add('status-connected');
+                    statusText.textContent = 'Conectado';
+                    latencyText.textContent = '(120ms)';
+                    break;
+                case 'disconnected':
+                    indicator.classList.add('status-disconnected');
+                    statusText.textContent = 'Desconectado';
+                    latencyText.textContent = '';
+                    break;
+                case 'reconnecting':
+                    indicator.classList.add('status-reconnecting');
+                    statusText.textContent = 'Reconectando...';
+                    latencyText.textContent = '(tentativa 2)';
+                    break;
+                case 'idle':
+                    indicator.classList.add('status-idle');
+                    statusText.textContent = 'Idle';
+                    latencyText.textContent = '';
+                    break;
+            }
+            
+            document.getElementById('connectionResult').innerHTML = `
+                <div class="test-result success">
+                    <strong>Status alterado para:</strong> ${status}
+                </div>
+            `;
+        }
+
+        // Função para testar localStorage
+        function testSessionStorage() {
+            const testData = {
+                userId: 'test-user-123',
+                email: 'test@example.com',
+                lastActivity: new Date().toISOString(),
+                sessionId: 'session-' + Date.now()
+            };
+            
+            try {
+                localStorage.setItem('zetafin_session', JSON.stringify(testData));
+                const retrieved = JSON.parse(localStorage.getItem('zetafin_session'));
+                
+                document.getElementById('storageResult').innerHTML = `
+                    <div class="test-result success">
+                        <strong>localStorage:</strong> Dados salvos e recuperados com sucesso
+                        <br><strong>Dados:</strong> ${JSON.stringify(retrieved, null, 2)}
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('storageResult').innerHTML = `
+                    <div class="test-result error">
+                        <strong>Erro localStorage:</strong> ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // Função para testar sessionStorage
+        function testSessionStorageSession() {
+            const testData = {
+                userId: 'test-user-456',
+                email: 'session@example.com',
+                lastActivity: new Date().toISOString(),
+                sessionId: 'session-' + Date.now()
+            };
+            
+            try {
+                sessionStorage.setItem('zetafin_session', JSON.stringify(testData));
+                const retrieved = JSON.parse(sessionStorage.getItem('zetafin_session'));
+                
+                document.getElementById('storageResult').innerHTML = `
+                    <div class="test-result success">
+                        <strong>sessionStorage:</strong> Dados salvos e recuperados com sucesso
+                        <br><strong>Dados:</strong> ${JSON.stringify(retrieved, null, 2)}
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('storageResult').innerHTML = `
+                    <div class="test-result error">
+                        <strong>Erro sessionStorage:</strong> ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // Função para testar IndexedDB
+        function testIndexedDB() {
+            const request = indexedDB.open('ZetaFinDB', 1);
+            
+            request.onerror = () => {
+                document.getElementById('storageResult').innerHTML = `
+                    <div class="test-result error">
+                        <strong>Erro IndexedDB:</strong> Não foi possível abrir o banco
+                    </div>
+                `;
+            };
+            
+            request.onupgradeneeded = () => {
+                const db = request.result;
+                if (!db.objectStoreNames.contains('sessions')) {
+                    db.createObjectStore('sessions');
+                }
+            };
+            
+            request.onsuccess = () => {
+                const db = request.result;
+                const transaction = db.transaction(['sessions'], 'readwrite');
+                const store = transaction.objectStore('sessions');
+                
+                const testData = {
+                    userId: 'test-user-789',
+                    email: 'indexeddb@example.com',
+                    lastActivity: new Date().toISOString(),
+                    sessionId: 'session-' + Date.now()
+                };
+                
+                store.put(testData, 'zetafin_session');
+                
+                transaction.oncomplete = () => {
+                    document.getElementById('storageResult').innerHTML = `
+                        <div class="test-result success">
+                            <strong>IndexedDB:</strong> Dados salvos com sucesso
+                            <br><strong>Dados:</strong> ${JSON.stringify(testData, null, 2)}
+                        </div>
+                    `;
+                };
+                
+                transaction.onerror = () => {
+                    document.getElementById('storageResult').innerHTML = `
+                        <div class="test-result error">
+                            <strong>Erro IndexedDB:</strong> Falha na transação
+                        </div>
+                    `;
+                };
+            };
+        }
+
+        // Função para limpar todos os dados de armazenamento
+        function clearAllStorage() {
+            try {
+                localStorage.removeItem('zetafin_session');
+                sessionStorage.removeItem('zetafin_session');
+                
+                const deleteRequest = indexedDB.deleteDatabase('ZetaFinDB');
+                deleteRequest.onsuccess = () => {
+                    document.getElementById('storageResult').innerHTML = `
+                        <div class="test-result success">
+                            <strong>Limpeza:</strong> Todos os dados foram removidos
+                        </div>
+                    `;
+                };
+            } catch (error) {
+                document.getElementById('storageResult').innerHTML = `
+                    <div class="test-result error">
+                        <strong>Erro na limpeza:</strong> ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // Função para testar código de conexão
+        function testConnectionCode() {
+            const code = document.getElementById('connectionCode').value.toUpperCase();
+            
+            if (code.length !== 6) {
+                document.getElementById('codeResult').innerHTML = `
+                    <div class="test-result error">
+                        <strong>Erro:</strong> O código deve ter exatamente 6 caracteres
+                    </div>
+                `;
+                return;
+            }
+            
+            if (!/^[A-Z0-9]{6}$/.test(code)) {
+                document.getElementById('codeResult').innerHTML = `
+                    <div class="test-result error">
+                        <strong>Erro:</strong> O código deve conter apenas letras e números
+                    </div>
+                `;
+                return;
+            }
+            
+            document.getElementById('codeResult').innerHTML = `
+                <div class="test-result success">
+                    <strong>Código válido:</strong> ${code}
+                    <br><strong>Formato:</strong> Compatível com sistema atual
+                    <br><strong>Status:</strong> Pronto para usar na página CoupleData
+                </div>
+            `;
+        }
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🧪 Página de teste carregada');
+            console.log('📋 Verificando funcionalidades implementadas...');
+            
+            // Verificar se o localStorage está funcionando
+            try {
+                localStorage.setItem('test', 'ok');
+                localStorage.removeItem('test');
+                console.log('✅ localStorage funcionando');
+            } catch (e) {
+                console.log('❌ localStorage com problemas:', e);
+            }
+            
+            // Verificar se o sessionStorage está funcionando
+            try {
+                sessionStorage.setItem('test', 'ok');
+                sessionStorage.removeItem('test');
+                console.log('✅ sessionStorage funcionando');
+            } catch (e) {
+                console.log('❌ sessionStorage com problemas:', e);
+            }
+            
+            // Verificar se o IndexedDB está disponível
+            if ('indexedDB' in window) {
+                console.log('✅ IndexedDB disponível');
+            } else {
+                console.log('❌ IndexedDB não disponível');
+            }
+            
+            // Verificar se a Clipboard API está disponível
+            if ('clipboard' in navigator) {
+                console.log('✅ Clipboard API disponível');
+            } else {
+                console.log('❌ Clipboard API não disponível');
+            }
+        });
+    </script>
+</body>
+</html>

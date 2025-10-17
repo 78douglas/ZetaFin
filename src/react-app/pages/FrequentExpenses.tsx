@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useFinanceDataHybrid } from '@/react-app/hooks/useFinanceDataHybrid';
 import { TipoTransacao } from '@/shared/types';
 import {
@@ -8,7 +8,9 @@ import {
   Calendar, ArrowLeft, Download, Filter, Repeat, 
   TrendingUp, AlertCircle, Clock, DollarSign
 } from 'lucide-react';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
+import BrazilianDateInput from '@/react-app/components/BrazilianDateInput';
+import { DATE_UTILS } from '@/react-app/lib/config';
 
 interface GastoFrequente {
   descricao: string;
@@ -22,13 +24,15 @@ interface GastoFrequente {
 }
 
 export default function FrequentExpenses() {
-  const { transacoes } = useFinanceDataHybrid();
+  const { transacoes, recarregarDados } = useFinanceDataHybrid();
   const [periodoAnalise, setPeriodoAnalise] = useState(6); // meses
   const [tipoPeriodo, setTipoPeriodo] = useState<'predefinido' | 'personalizado'>('predefinido');
   const [dataInicio, setDataInicio] = useState('');
   const [dataFim, setDataFim] = useState('');
   const [filtroCategoria, setFiltroCategoria] = useState('todas');
   const [ordenacao, setOrdenacao] = useState<'frequencia' | 'valor' | 'categoria'>('frequencia');
+
+
 
   const formatarMoeda = (valor: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -38,7 +42,7 @@ export default function FrequentExpenses() {
   };
 
   const formatarData = (data: string) => {
-    return new Date(data).toLocaleDateString('pt-BR');
+    return DATE_UTILS.formatToBrazilian(data);
   };
 
   const dadosAnalise = useMemo(() => {
@@ -49,9 +53,11 @@ export default function FrequentExpenses() {
       dataInicioFiltro = new Date(dataInicio);
       dataFimFiltro = new Date(dataFim);
     } else {
-      const agora = new Date();
-      dataInicioFiltro = new Date(agora.getFullYear(), agora.getMonth() - periodoAnalise, 1);
-      dataFimFiltro = agora;
+      // Usar período baseado no mês atual
+      const now = new Date();
+      const monthsBack = periodoAnalise;
+      dataInicioFiltro = new Date(now.getFullYear(), now.getMonth() - monthsBack + 1, 1);
+      dataFimFiltro = new Date(now.getFullYear(), now.getMonth() + 1, 0);
     }
     
     const despesas = transacoes.filter(t => 
@@ -68,12 +74,12 @@ export default function FrequentExpenses() {
         .replace(/[^\w\s]/g, '')
         .trim();
       
-      const chave = `${descricaoNormalizada}_${transacao.categoriaId}`;
+      const chave = `${descricaoNormalizada}_${transacao.categoria_id}`;
       
       if (!grupos[chave]) {
         grupos[chave] = {
           descricao: transacao.descricao,
-          categoria: transacao.categoriaId,
+          categoria: transacao.categoria_id,
           transacoes: []
         };
       }
@@ -269,30 +275,17 @@ export default function FrequentExpenses() {
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="flex flex-col space-y-2">
-                  <div className="flex items-center space-x-2">
-                    <Calendar className="w-4 h-4 text-gray-400" />
-                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Data Início:</label>
-                  </div>
-                  <input
-                    type="date"
-                    value={dataInicio}
-                    onChange={(e) => setDataInicio(e.target.value)}
-                    className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                <div className="flex flex-col space-y-2">
-                  <div className="flex items-center space-x-2">
-                    <Calendar className="w-4 h-4 text-gray-400" />
-                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Data Fim:</label>
-                  </div>
-                  <input
-                    type="date"
-                    value={dataFim}
-                    onChange={(e) => setDataFim(e.target.value)}
-                    className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
+                <BrazilianDateInput
+                  label="Data Início"
+                  value={dataInicio}
+                  onChange={setDataInicio}
+                />
+                
+                <BrazilianDateInput
+                  label="Data Fim"
+                  value={dataFim}
+                  onChange={setDataFim}
+                />
               </div>
             )}
 

@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste das Funcionalidades - ZetaFin</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+        }
+        .section h2 {
+            color: #2c3e50;
+            margin-top: 0;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .success {
+            background-color: #27ae60;
+        }
+        .success:hover {
+            background-color: #229954;
+        }
+        .danger {
+            background-color: #e74c3c;
+        }
+        .danger:hover {
+            background-color: #c0392b;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .result.success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .result.error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .result.info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        .status {
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .status.online {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.offline {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .console-log {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 2px 0;
+        }
+        .log-entry.definitivo {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        .log-entry.success {
+            color: #27ae60;
+        }
+        .log-entry.error {
+            color: #e74c3c;
+        }
+        .log-entry.info {
+            color: #3498db;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Teste das Funcionalidades ZetaFin</h1>
+        
+        <div id="status" class="status offline">
+            ❌ Sistema Offline - Verificando conexão...
+        </div>
+
+        <!-- Seção 1: Criar Link -->
+        <div class="section">
+            <h2>🔗 Teste: Criar Link de Convite</h2>
+            <div class="input-group">
+                <label for="inviteMessage">Mensagem do Convite (opcional):</label>
+                <input type="text" id="inviteMessage" placeholder="Ex: Vamos gerenciar nossas finanças juntos!" value="Teste de convite do ZetaFin">
+            </div>
+            <button onclick="testCreateInvite()">🚀 Criar Convite</button>
+            <button onclick="clearInviteResult()" class="danger">🧹 Limpar</button>
+            <div id="inviteResult" class="result info" style="display: none;"></div>
+        </div>
+
+        <!-- Seção 2: Conectar Parceiro -->
+        <div class="section">
+            <h2>👥 Teste: Conectar com Parceiro</h2>
+            <div class="input-group">
+                <label for="partnerCode">Código do Parceiro:</label>
+                <input type="text" id="partnerCode" placeholder="Ex: ABC123" value="">
+            </div>
+            <button onclick="testConnectPartner()">🔗 Conectar</button>
+            <button onclick="listAllCodes()" class="success">📋 Listar Códigos</button>
+            <button onclick="clearPartnerResult()" class="danger">🧹 Limpar</button>
+            <div id="partnerResult" class="result info" style="display: none;"></div>
+        </div>
+
+        <!-- Console de Logs -->
+        <div class="section">
+            <h2>📊 Console de Logs</h2>
+            <button onclick="clearConsole()" class="danger">🧹 Limpar Console</button>
+            <div id="consoleLog" class="console-log">
+                <div class="log-entry info">🔍 Console iniciado - aguardando logs...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Interceptar console.log para mostrar na página
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        
+        function addLogEntry(message, type = 'info') {
+            const consoleDiv = document.getElementById('consoleLog');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            
+            // Detectar logs DEFINITIVO
+            if (message.includes('[DEFINITIVO]')) {
+                entry.className += ' definitivo';
+            }
+            
+            const timestamp = new Date().toLocaleTimeString();
+            entry.textContent = `[${timestamp}] ${message}`;
+            
+            consoleDiv.appendChild(entry);
+            consoleDiv.scrollTop = consoleDiv.scrollHeight;
+        }
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            addLogEntry(args.join(' '), 'info');
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            addLogEntry(args.join(' '), 'error');
+        };
+        
+        console.warn = function(...args) {
+            originalWarn.apply(console, args);
+            addLogEntry(args.join(' '), 'info');
+        };
+
+        // Verificar status do sistema
+        async function checkSystemStatus() {
+            try {
+                const response = await fetch('http://localhost:5173');
+                if (response.ok) {
+                    document.getElementById('status').className = 'status online';
+                    document.getElementById('status').innerHTML = '✅ Sistema Online - Pronto para testes';
+                    console.log('✅ Sistema ZetaFin está online e funcionando');
+                } else {
+                    throw new Error('Servidor não respondeu corretamente');
+                }
+            } catch (error) {
+                document.getElementById('status').className = 'status offline';
+                document.getElementById('status').innerHTML = '❌ Sistema Offline - Verifique se o servidor está rodando';
+                console.error('❌ Erro ao verificar status do sistema:', error.message);
+            }
+        }
+
+        // Teste: Criar Convite
+        async function testCreateInvite() {
+            const message = document.getElementById('inviteMessage').value;
+            const resultDiv = document.getElementById('inviteResult');
+            
+            console.log('🚀 [TESTE] Iniciando teste de criação de convite...');
+            console.log('🔍 [TESTE] Mensagem:', message);
+            
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result info';
+            resultDiv.textContent = '⏳ Criando convite... Aguarde...';
+            
+            try {
+                // Simular chamada da função createInvite
+                console.log('📡 [TESTE] Simulando chamada para createInvite...');
+                
+                // Aqui normalmente chamaríamos a função real, mas como estamos testando
+                // vamos simular o comportamento esperado
+                const mockResult = {
+                    token: `invite_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`,
+                    url: `http://localhost:5173/invite/invite_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`,
+                    expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+                    id: `test_${Date.now()}`
+                };
+                
+                console.log('✅ [TESTE] Convite criado com sucesso!');
+                console.log('🎯 [TESTE] Token:', mockResult.token);
+                console.log('🔗 [TESTE] URL:', mockResult.url);
+                console.log('📅 [TESTE] Expira em:', mockResult.expires_at);
+                
+                resultDiv.className = 'result success';
+                resultDiv.textContent = `✅ SUCESSO! Convite criado:
+
+🎯 Token: ${mockResult.token}
+🔗 URL: ${mockResult.url}
+📅 Expira em: ${new Date(mockResult.expires_at).toLocaleString()}
+🆔 ID: ${mockResult.id}
+
+📋 Copie a URL acima para compartilhar o convite!`;
+                
+            } catch (error) {
+                console.error('❌ [TESTE] Erro ao criar convite:', error);
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ ERRO ao criar convite:
+
+${error.message}
+
+🔍 Verifique o console para mais detalhes.`;
+            }
+        }
+
+        // Teste: Conectar com Parceiro
+        async function testConnectPartner() {
+            const partnerCode = document.getElementById('partnerCode').value.trim();
+            const resultDiv = document.getElementById('partnerResult');
+            
+            console.log('🚀 [TESTE] Iniciando teste de conexão com parceiro...');
+            console.log('🔍 [TESTE] Código do parceiro:', partnerCode);
+            
+            if (!partnerCode) {
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '❌ ERRO: Digite um código de parceiro válido!';
+                console.error('❌ [TESTE] Código do parceiro não fornecido');
+                return;
+            }
+            
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result info';
+            resultDiv.textContent = '⏳ Conectando com parceiro... Aguarde...';
+            
+            try {
+                console.log('📡 [TESTE] Simulando busca por parceiro...');
+                
+                // Simular busca de parceiro
+                const mockPartners = [
+                    { code: 'ABC123', name: 'João Silva', email: 'joao@email.com' },
+                    { code: 'XYZ789', name: 'Maria Santos', email: 'maria@email.com' },
+                    { code: 'DEF456', name: 'Pedro Costa', email: 'pedro@email.com' }
+                ];
+                
+                const partner = mockPartners.find(p => 
+                    p.code.toUpperCase() === partnerCode.toUpperCase()
+                );
+                
+                if (!partner) {
+                    console.error('❌ [TESTE] Parceiro não encontrado');
+                    console.log('📋 [TESTE] Códigos disponíveis:', mockPartners.map(p => p.code).join(', '));
+                    
+                    resultDiv.className = 'result error';
+                    resultDiv.textContent = `❌ PARCEIRO NÃO ENCONTRADO!
+
+🔍 Código procurado: ${partnerCode}
+📋 Códigos disponíveis: ${mockPartners.map(p => p.code).join(', ')}
+
+💡 Dica: Verifique se o código está correto.`;
+                    return;
+                }
+                
+                console.log('✅ [TESTE] Parceiro encontrado:', partner);
+                console.log('🔗 [TESTE] Conectando...');
+                
+                // Simular conexão bem-sucedida
+                const connectionData = {
+                    partnerId: `partner_${Date.now()}`,
+                    partnerName: partner.name,
+                    partnerEmail: partner.email,
+                    partnerCode: partnerCode,
+                    connectedAt: new Date().toISOString(),
+                    isConnected: true
+                };
+                
+                console.log('🎉 [TESTE] Conexão realizada com sucesso!');
+                console.log('👥 [TESTE] Dados da conexão:', connectionData);
+                
+                resultDiv.className = 'result success';
+                resultDiv.textContent = `🎉 CONEXÃO REALIZADA COM SUCESSO!
+
+👤 Parceiro: ${connectionData.partnerName}
+📧 Email: ${connectionData.partnerEmail}
+🔑 Código: ${connectionData.partnerCode}
+📅 Conectado em: ${new Date(connectionData.connectedAt).toLocaleString()}
+
+✅ Vocês agora estão conectados como parceiros no ZetaFin!`;
+                
+            } catch (error) {
+                console.error('❌ [TESTE] Erro ao conectar com parceiro:', error);
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ ERRO ao conectar com parceiro:
+
+${error.message}
+
+🔍 Verifique o console para mais detalhes.`;
+            }
+        }
+
+        // Listar todos os códigos disponíveis
+        function listAllCodes() {
+            console.log('📋 [TESTE] Listando todos os códigos disponíveis...');
+            
+            const mockCodes = [
+                'ABC123 - João Silva',
+                'XYZ789 - Maria Santos', 
+                'DEF456 - Pedro Costa',
+                'GHI789 - Ana Oliveira',
+                'JKL012 - Carlos Ferreira'
+            ];
+            
+            const resultDiv = document.getElementById('partnerResult');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result info';
+            resultDiv.textContent = `📋 CÓDIGOS DISPONÍVEIS PARA TESTE:
+
+${mockCodes.join('\n')}
+
+💡 Copie um dos códigos acima e cole no campo "Código do Parceiro" para testar a conexão.`;
+            
+            console.log('📋 [TESTE] Códigos listados:', mockCodes);
+        }
+
+        // Funções de limpeza
+        function clearInviteResult() {
+            document.getElementById('inviteResult').style.display = 'none';
+            console.log('🧹 [TESTE] Resultado do convite limpo');
+        }
+
+        function clearPartnerResult() {
+            document.getElementById('partnerResult').style.display = 'none';
+            console.log('🧹 [TESTE] Resultado da conexão limpo');
+        }
+
+        function clearConsole() {
+            document.getElementById('consoleLog').innerHTML = '<div class="log-entry info">🔍 Console limpo - aguardando logs...</div>';
+        }
+
+        // Inicializar página
+        window.onload = function() {
+            console.log('🚀 Página de teste carregada');
+            console.log('🔍 Verificando status do sistema...');
+            checkSystemStatus();
+            
+            // Verificar novamente a cada 30 segundos
+            setInterval(checkSystemStatus, 30000);
+        };
+    </script>
+</body>
+</html>

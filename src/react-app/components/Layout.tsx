@@ -1,6 +1,6 @@
-import { ReactNode, useState } from 'react';
-import { Link, useLocation } from 'react-router';
-import { Home, Receipt, Plus, BarChart3, User, LogOut, ChevronDown, RefreshCw } from 'lucide-react';
+import { ReactNode, useState, useEffect, useRef } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Home, Receipt, Plus, BarChart3, User, LogOut, ChevronDown, RefreshCw, ArrowDown, ArrowUp, MessageSquare } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 interface LayoutProps {
@@ -8,15 +8,19 @@ interface LayoutProps {
 }
 
 export default function Layout({ children }: LayoutProps) {
-  const location = useLocation();
   const { user, signOut } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [isMenuExpanded, setIsMenuExpanded] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const expandedMenuRef = useRef<HTMLDivElement>(null);
 
   const navigation = [
     { name: 'Dashboard', href: '/', icon: Home, label: 'Início' },
-    { name: 'Transações', href: '/transacoes', icon: Receipt, label: 'Transações' },
-    { name: 'Nova Transação', href: '/nova-transacao', icon: Plus, label: 'Nova Transação', isCenter: true },
-    { name: 'Relatórios', href: '/relatorios', icon: BarChart3, label: 'Relatórios' },
+    { name: 'Transações', href: '/transacoes', icon: MessageSquare, label: 'Transações' },
+    { name: 'Nova Transação', href: '/nova-transacao', icon: Plus, label: 'Nova', isCenter: true },
+    { name: 'Relatórios', href: '/relatorios', icon: BarChart3, label: 'Planejamento' },
     { name: 'Perfil', href: '/perfil', icon: User, label: 'Perfil' },
   ];
 
@@ -25,6 +29,31 @@ export default function Layout({ children }: LayoutProps) {
     if (path !== '/' && location.pathname.startsWith(path)) return true;
     return false;
   };
+
+  const handleMenuToggle = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShowUserMenu(prev => !prev);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setShowUserMenu(false);
+      }
+      if (expandedMenuRef.current && !expandedMenuRef.current.contains(event.target as Node)) {
+        setIsMenuExpanded(false);
+      }
+    };
+
+    if (showUserMenu || isMenuExpanded) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showUserMenu, isMenuExpanded]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 pb-20">
@@ -44,10 +73,11 @@ export default function Layout({ children }: LayoutProps) {
             </div>
             
             {/* User Info */}
-            <div className="relative">
+            <div className="relative" ref={menuRef}>
               <button
-                onClick={() => setShowUserMenu(!showUserMenu)}
-                className="flex items-center space-x-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg p-2 transition-colors"
+                onClick={handleMenuToggle}
+                className="flex items-center space-x-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg p-2 transition-colors cursor-pointer relative z-10"
+                type="button"
               >
                 <div className="text-right hidden sm:block">
                   <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
@@ -65,7 +95,12 @@ export default function Layout({ children }: LayoutProps) {
 
               {/* Dropdown Menu */}
               {showUserMenu && (
-                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
+                <div 
+                  className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 z-50"
+                  style={{ 
+                    top: '100%'
+                  }}
+                >
                   <div className="py-1">
                     <Link
                       to="/perfil"
@@ -113,22 +148,79 @@ export default function Layout({ children }: LayoutProps) {
 
       {/* Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-gray-800/95 backdrop-blur-md border-t border-gray-200/50 dark:border-gray-700/50 z-50">
-        <div className="flex items-center justify-around h-20 px-4">
-          {navigation.map((item) => (
+        <div className="flex items-center justify-around h-20 px-4 relative">
+          {navigation.map((item, index) => (
             <Link
               key={item.name}
               to={item.href}
               className={`flex flex-col items-center justify-center transition-all duration-200 ${
-                item.isCenter ? '' : 'flex-1'
+                item.isCenter ? 'relative' : 'flex-1'
               }`}
             >
               {item.isCenter ? (
-                <div className={`w-14 h-14 rounded-full flex items-center justify-center transition-all duration-200 ${
-                  isActive(item.href)
-                    ? 'bg-blue-600 shadow-lg shadow-blue-600/30'
-                    : 'bg-blue-500 hover:bg-blue-600'
-                }`}>
-                  <item.icon className="w-7 h-7 text-white" />
+                <div className="relative flex items-center justify-center" ref={expandedMenuRef}>
+                  {/* Botões circulares coloridos para despesas e receitas - só aparecem quando expandido */}
+                  <div 
+                    className={`absolute -top-6 -left-10 z-10 transition-all duration-300 ease-in-out ${
+                      isMenuExpanded 
+                        ? 'opacity-100 scale-100 translate-y-0' 
+                        : 'opacity-0 scale-50 translate-y-2 pointer-events-none'
+                    }`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      navigate('/nova-transacao?tipo=DESPESA');
+                      setIsMenuExpanded(false);
+                    }}
+                  >
+                    <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center shadow-lg hover:bg-red-600 transition-colors cursor-pointer hover:scale-110 transform">
+                      <ArrowDown className="w-5 h-5 text-white" />
+                    </div>
+                  </div>
+                  <div 
+                    className={`absolute -top-6 -right-10 z-10 transition-all duration-300 ease-in-out ${
+                      isMenuExpanded 
+                        ? 'opacity-100 scale-100 translate-y-0' 
+                        : 'opacity-0 scale-50 translate-y-2 pointer-events-none'
+                    }`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      navigate('/nova-transacao?tipo=RECEITA');
+                      setIsMenuExpanded(false);
+                    }}
+                  >
+                    <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center shadow-lg hover:bg-green-600 transition-colors cursor-pointer hover:scale-110 transform">
+                      <ArrowUp className="w-5 h-5 text-white" />
+                    </div>
+                  </div>
+                  
+                  {/* Botão central azul */}
+                  <div 
+                    className={`w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300 shadow-lg hover:scale-105 transform cursor-pointer ${
+                      isActive(item.href)
+                        ? 'bg-blue-600 shadow-blue-600/30'
+                        : 'bg-blue-500 hover:bg-blue-600'
+                    }`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setIsMenuExpanded(!isMenuExpanded);
+                    }}
+                  >
+                    <item.icon className={`w-8 h-8 text-white transition-transform duration-300 ${
+                      isMenuExpanded ? 'rotate-45' : 'rotate-0'
+                    }`} />
+                  </div>
+                  
+                  {/* Label do botão central */}
+                  <span className={`absolute -bottom-6 text-xs font-medium ${
+                    isActive(item.href)
+                      ? 'text-blue-600 dark:text-blue-400'
+                      : 'text-gray-500 dark:text-gray-400'
+                  }`}>
+                    {item.label}
+                  </span>
                 </div>
               ) : (
                 <>

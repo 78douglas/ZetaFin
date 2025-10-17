@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Adicionar Dados de Exemplo</title>
+</head>
+<body>
+    <h1>Adicionar Transações de Exemplo</h1>
+    <button onclick="addSampleData()">Adicionar Dados de Exemplo</button>
+    <button onclick="clearData()">Limpar Dados</button>
+    <div id="result"></div>
+
+    <script>
+        function addSampleData() {
+            const sampleTransactions = [
+                {
+                    id: "1",
+                    descricao: "Salário",
+                    descricaoAdicional: "Salário mensal",
+                    valor: 5000,
+                    data: "2024-01-15",
+                    tipo: "receita",
+                    categoria: "Salário",
+                    tags: ["trabalho", "mensal"],
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                },
+                {
+                    id: "2",
+                    descricao: "Supermercado",
+                    descricaoAdicional: "Compras da semana",
+                    valor: 250,
+                    data: "2024-01-16",
+                    tipo: "despesa",
+                    categoria: "Alimentação",
+                    tags: ["comida", "essencial"],
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                },
+                {
+                    id: "3",
+                    descricao: "Freelance",
+                    descricaoAdicional: "Projeto web",
+                    valor: 1500,
+                    data: "2024-01-17",
+                    tipo: "receita",
+                    categoria: "Freelance",
+                    tags: ["extra", "projeto"],
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                }
+            ];
+
+            localStorage.setItem('transactions', JSON.stringify(sampleTransactions));
+            document.getElementById('result').innerHTML = '<p style="color: green;">Dados de exemplo adicionados com sucesso!</p>';
+            console.log('Transações adicionadas:', sampleTransactions);
+        }
+
+        function clearData() {
+            localStorage.removeItem('transactions');
+            document.getElementById('result').innerHTML = '<p style="color: red;">Dados removidos!</p>';
+            console.log('Dados removidos do localStorage');
+        }
+
+        // Mostrar dados atuais
+        function showCurrentData() {
+            const current = localStorage.getItem('transactions');
+            console.log('Dados atuais no localStorage:', current);
+            if (current) {
+                document.getElementById('result').innerHTML = '<p>Dados encontrados no localStorage. Verifique o console.</p>';
+            } else {
+                document.getElementById('result').innerHTML = '<p>Nenhum dado encontrado no localStorage.</p>';
+            }
+        }
+
+        // Mostrar dados atuais ao carregar a página
+        window.onload = showCurrentData;
+    </script>
+</body>
+</html>

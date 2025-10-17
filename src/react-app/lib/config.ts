@@ -1,5 +1,5 @@
 // Flag para ativar/desativar Supabase
-export const USE_SUPABASE = false; // Temporariamente desativado para usar localStorage
+export const USE_SUPABASE = true; // Ativado - modo de produção com Supabase
 
 // Configurações do localStorage
 export const STORAGE_KEYS = {
@@ -7,8 +7,7 @@ export const STORAGE_KEYS = {
   CATEGORIES: 'zetafin_categories',
   USER: 'zetafin_user',
   AUTH_TOKEN: 'zetafin_auth_token',
-  THEME: 'zetafin_theme',
-  COUPLE_DATA: 'zetafin_couple_data'
+  THEME: 'zetafin_theme'
 };
 
 // Configuração da aplicação
@@ -56,4 +55,164 @@ export const APP_CONFIG = {
     { id: '30', nome: 'Transferência', tipo_padrao: 'AMBOS', cor: '#64748b', icone: '🔄', ativa: true },
     { id: '31', nome: 'Outros', tipo_padrao: 'AMBOS', cor: '#6b7280', icone: '📝', ativa: true }
   ]
+}
+
+// Utilitários para formatação de datas brasileiras e funções de data
+export const DATE_UTILS = {
+  // Formatar data para formato brasileiro (DD/MM/AAAA)
+  formatToBrazilian: (dateString: string): string => {
+    if (!dateString) return '';
+    try {
+      return new Date(dateString).toLocaleDateString('pt-BR');
+    } catch {
+      return '';
+    }
+  },
+
+  // Formatar data para formato brasileiro com hora (DD/MM/AAAA HH:mm)
+  formatToBrazilianWithTime: (dateString: string): string => {
+    if (!dateString) return '';
+    try {
+      return new Date(dateString).toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch {
+      return '';
+    }
+  },
+
+  // Formatar data para formato brasileiro curto (DD/MM)
+  formatToBrazilianShort: (dateString: string): string => {
+    if (!dateString) return '';
+    try {
+      return new Date(dateString).toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit'
+      });
+    } catch {
+      return '';
+    }
+  },
+
+  // Formatar data para mês/ano (MM/AAAA)
+  formatToMonthYear: (dateString: string): string => {
+    if (!dateString) return '';
+    try {
+      return new Date(dateString).toLocaleDateString('pt-BR', {
+        month: '2-digit',
+        year: 'numeric'
+      });
+    } catch {
+      return '';
+    }
+  },
+
+  // Formatar data para mês por extenso (Janeiro de 2024)
+  formatToFullMonth: (dateString: string): string => {
+    if (!dateString) return '';
+    try {
+      return new Date(dateString).toLocaleDateString('pt-BR', {
+        month: 'long',
+        year: 'numeric'
+      });
+    } catch {
+      return '';
+    }
+  },
+
+  // Converter data ISO para formato brasileiro (YYYY-MM-DD -> DD/MM/AAAA)
+  isoToBrazilian: (isoDate: string): string => {
+    if (!isoDate) return '';
+    try {
+      const [year, month, day] = isoDate.split('-');
+      return `${day}/${month}/${year}`;
+    } catch {
+      return '';
+    }
+  },
+
+  // Converter data brasileira para formato ISO (DD/MM/AAAA -> YYYY-MM-DD)
+  brazilianToIso: (brazilianDate: string): string => {
+    if (!brazilianDate) return '';
+    try {
+      const cleanDate = brazilianDate.replace(/\D/g, '');
+      if (cleanDate.length !== 8) return '';
+      
+      const day = cleanDate.substring(0, 2);
+      const month = cleanDate.substring(2, 4);
+      const year = cleanDate.substring(4, 8);
+      
+      // Validar data
+      const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+      if (date.getFullYear() !== parseInt(year) || 
+          date.getMonth() !== parseInt(month) - 1 || 
+          date.getDate() !== parseInt(day)) {
+        return '';
+      }
+      
+      return `${year}-${month}-${day}`;
+    } catch {
+      return '';
+    }
+  },
+
+  // Obter o mês atual no formato YYYY-MM
+  getCurrentMonth: (): string => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    return `${year}-${month}`;
+  },
+
+  // Obter o primeiro dia do mês atual
+  getCurrentMonthStart: (): string => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    return `${year}-${month}-01`;
+  },
+
+  // Obter o último dia do mês atual
+  getCurrentMonthEnd: (): string => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1;
+    const lastDay = new Date(year, month, 0).getDate();
+    const monthStr = String(month).padStart(2, '0');
+    return `${year}-${monthStr}-${String(lastDay).padStart(2, '0')}`;
+  },
+
+  // Obter o primeiro dia do ano atual
+  getCurrentYearStart: (): string => {
+    const now = new Date();
+    return `${now.getFullYear()}-01-01`;
+  },
+
+  // Obter o último dia do ano atual
+  getCurrentYearEnd: (): string => {
+    const now = new Date();
+    return `${now.getFullYear()}-12-31`;
+  },
+
+  // Obter data de N meses atrás
+  getMonthsAgo: (months: number): string => {
+    const now = new Date();
+    const targetDate = new Date(now.getFullYear(), now.getMonth() - months, 1);
+    const year = targetDate.getFullYear();
+    const month = String(targetDate.getMonth() + 1).padStart(2, '0');
+    return `${year}-${month}-01`;
+  },
+
+  // Obter data atual no formato YYYY-MM-DD
+  getCurrentDate: (): string => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
 }

@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { ArrowLeft, HelpCircle, Search, ChevronDown, ChevronRight, MessageCircle, Mail, Phone, Book } from 'lucide-react';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 
 export default function Help() {
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   const faqItems = [
     {
@@ -14,11 +15,6 @@ export default function Help() {
     },
     {
       id: 2,
-      question: 'Como conectar com meu parceiro?',
-      answer: 'Vá para Perfil > Dados do Casal e digite o email do seu parceiro no campo de convite. Ele receberá um email com instruções para se conectar. Após a conexão, vocês poderão compartilhar transações e metas financeiras.'
-    },
-    {
-      id: 3,
       question: 'Como criar categorias personalizadas?',
       answer: 'Ao adicionar uma nova transação, você pode criar uma categoria personalizada clicando em "Nova Categoria" no seletor de categorias. Digite o nome da categoria e escolha uma cor para identificá-la facilmente.'
     },
@@ -70,18 +66,41 @@ export default function Help() {
       color: 'text-purple-600 dark:text-purple-400',
       bgColor: 'bg-purple-100 dark:bg-purple-900/30',
       topics: ['Interpretar gráficos', 'Filtros avançados', 'Exportar dados']
-    },
-    {
-      title: 'Funcionalidades para Casais',
-      icon: Mail,
-      color: 'text-pink-600 dark:text-pink-400',
-      bgColor: 'bg-pink-100 dark:bg-pink-900/30',
-      topics: ['Conectar parceiro', 'Metas compartilhadas', 'Gastos conjuntos']
     }
   ];
 
   const toggleFaq = (id: number) => {
     setExpandedFaq(expandedFaq === id ? null : id);
+  };
+
+  const handleCategoryClick = (categoryTitle: string) => {
+    setSelectedCategory(selectedCategory === categoryTitle ? null : categoryTitle);
+    
+    // Filtrar FAQs relacionadas à categoria selecionada
+    const categoryKeywords = {
+      'Primeiros Passos': ['começar', 'configuração', 'primeira', 'inicial'],
+      'Transações': ['transação', 'adicionar', 'receita', 'despesa', 'categoria'],
+      'Relatórios': ['gráfico', 'relatório', 'exportar', 'dados', 'filtro']
+    };
+
+    const keywords = categoryKeywords[categoryTitle as keyof typeof categoryKeywords] || [];
+    const relatedFaq = faqItems.find(faq => 
+      keywords.some(keyword => 
+        faq.question.toLowerCase().includes(keyword) || 
+        faq.answer.toLowerCase().includes(keyword)
+      )
+    );
+
+    if (relatedFaq) {
+      setExpandedFaq(relatedFaq.id);
+      // Scroll para a seção de FAQ
+      setTimeout(() => {
+        const faqSection = document.querySelector(`[data-faq-id="${relatedFaq.id}"]`);
+        if (faqSection) {
+          faqSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
+    }
   };
 
   const handleContactSupport = (type: 'chat' | 'email' | 'phone') => {
@@ -138,7 +157,15 @@ export default function Help() {
       {/* Help Categories */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {helpCategories.map((category, index) => (
-          <div key={index} className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+          <div 
+            key={index} 
+            onClick={() => handleCategoryClick(category.title)}
+            className={`bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all cursor-pointer border-2 ${
+              selectedCategory === category.title 
+                ? 'border-blue-500 dark:border-blue-400 ring-2 ring-blue-500/20' 
+                : 'border-transparent hover:border-gray-200 dark:hover:border-gray-600'
+            }`}
+          >
             <div className="flex items-center space-x-3 mb-4">
               <div className={`w-10 h-10 ${category.bgColor} rounded-lg flex items-center justify-center`}>
                 <category.icon className={`w-5 h-5 ${category.color}`} />
@@ -147,11 +174,18 @@ export default function Help() {
             </div>
             <ul className="space-y-2">
               {category.topics.map((topic, topicIndex) => (
-                <li key={topicIndex} className="text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer">
+                <li key={topicIndex} className="text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400">
                   • {topic}
                 </li>
               ))}
             </ul>
+            {selectedCategory === category.title && (
+              <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
+                <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">
+                  ✓ Clique expandiu a FAQ relacionada abaixo
+                </p>
+              </div>
+            )}
           </div>
         ))}
       </div>
@@ -165,7 +199,7 @@ export default function Help() {
 
         <div className="divide-y divide-gray-100 dark:divide-gray-700">
           {filteredFaqs.map((faq) => (
-            <div key={faq.id} className="p-4">
+            <div key={faq.id} className="p-4" data-faq-id={faq.id}>
               <button
                 onClick={() => toggleFaq(faq.id)}
                 className="w-full flex items-center justify-between text-left hover:bg-gray-50 dark:hover:bg-gray-700 p-2 rounded-lg transition-colors"

@@ -7,15 +7,31 @@ interface FinanceDataOptions {
   filters?: TransactionFilters
 }
 
-export const useFinanceDataLocal = (options: FinanceDataOptions = {}) => {
-  console.log('🏠 DEBUG: useFinanceDataLocal iniciado com options:', options)
-  const { limit = 100, filters } = options
+export const useFinanceDataLocal = (options?: any) => {
+  console.log('🔧 useFinanceDataLocal - INICIANDO');
+  
+  // Garantir que options tenha valores padrão e memoizar para evitar re-renders
+  const safeOptions = useMemo(() => options || {}, [options]);
+  
+  const transactionMethods = useTransactionsLocal(safeOptions);
+  
+  console.log('🔧 useFinanceDataLocal - transactionMethods recebidos:', {
+    hasCreateTransaction: !!transactionMethods.createTransaction,
+    hasUpdateTransaction: !!transactionMethods.updateTransaction,
+    keys: Object.keys(transactionMethods)
+  });
+  
+  const { limit = 100, filters } = safeOptions;
   
   const { 
     transactions, 
     loading: transactionsLoading, 
     error: transactionsError,
-    ...transactionMethods 
+    createTransaction,
+    updateTransaction,
+    deleteTransaction,
+    getTransactionById,
+    refetch
   } = useTransactionsLocal(filters)
   
   console.log('🏠 DEBUG: useTransactionsLocal retornou:', {
@@ -28,7 +44,9 @@ export const useFinanceDataLocal = (options: FinanceDataOptions = {}) => {
     categories, 
     loading: categoriesLoading, 
     error: categoriesError,
-    getCategoryById 
+    getCategoryById,
+    updateCategory,
+    deleteCategory
   } = useCategoriesLocal()
 
   const loading = transactionsLoading || categoriesLoading
@@ -72,8 +90,43 @@ export const useFinanceDataLocal = (options: FinanceDataOptions = {}) => {
 
   // Função para excluir transação (compatibilidade)
   const excluirTransacao = useCallback(async (id: string) => {
-    return await transactionMethods.deleteTransaction(id)
-  }, [transactionMethods])
+    return await deleteTransaction(id)
+  }, [deleteTransaction])
+
+  // Função para obter transação por ID (compatibilidade com TransactionForm)
+  const obterTransacao = useCallback((id: string) => {
+    console.log('🔍 obterTransacao chamado com ID:', id);
+    console.log('🔍 Transações disponíveis:', transactions.map(t => ({ id: t.id, descricao: t.descricao })));
+    
+    const transaction = getTransactionById(id);
+    console.log('🔍 Transação encontrada:', transaction);
+    
+    if (!transaction) {
+      console.log('❌ Transação não encontrada para ID:', id);
+      return undefined;
+    }
+
+    // Mapear para o formato esperado pelo TransactionForm
+    const categoria = obterCategoria(transaction.categoria_id);
+
+    const result = {
+      id: transaction.id,
+      descricao: transaction.descricao,
+      descricaoAdicional: transaction.descricaoAdicional || '',
+      valor: transaction.valor,
+      data: transaction.data,
+      tipo: transaction.tipo,
+      categoria_id: transaction.categoria_id,
+      categoria: categoria,
+      registradoPor: 'local',
+      created_at: transaction.created_at,
+      updated_at: transaction.updated_at,
+      tags: transaction.tags || []
+    };
+    
+    console.log('✅ Retornando transação formatada:', result);
+    return result;
+  }, [getTransactionById, obterCategoria, transactions])
 
   // Calcular estatísticas financeiras
   const estatisticas = useMemo(() => {
@@ -174,8 +227,8 @@ export const useFinanceDataLocal = (options: FinanceDataOptions = {}) => {
 
   // Função para recarregar dados
   const recarregarDados = useCallback(() => {
-    transactionMethods.refetch()
-  }, [transactionMethods])
+    refetch()
+  }, [refetch])
 
   return {
     // Dados
@@ -188,12 +241,21 @@ export const useFinanceDataLocal = (options: FinanceDataOptions = {}) => {
     error,
     
     // Funções de transações
-    ...transactionMethods,
+    createTransaction,
+    updateTransaction,
+    deleteTransaction,
+    getTransactionById,
+    refetch,
+    adicionarTransacao: createTransaction, // Alias para compatibilidade
+    editarTransacao: updateTransaction, // Alias para compatibilidade
     filtrarTransacoes,
     excluirTransacao,
+    obterTransacao,
     
     // Funções de categorias
     obterCategoria,
+    updateCategory,
+    deleteCategory,
     
     // Funções de controle
     carregarMaisTransacoes,

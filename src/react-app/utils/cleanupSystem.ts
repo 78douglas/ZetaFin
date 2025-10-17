@@ -18,7 +18,6 @@ const ALL_STORAGE_KEYS = [
   'zetafin_user',
   'zetafin_auth_token',
   'zetafin_theme',
-  'zetafin_couple_data',
   
   // Chaves antigas que podem existir
   'transactions',
@@ -27,20 +26,11 @@ const ALL_STORAGE_KEYS = [
   'auth_token',
   'theme',
   
-  // Chaves de dados fictícios
-  'dados_ficticios_inseridos',
-  'auto_insert_executed',
-  'mock_data_inserted',
-  'ficticios_inseridos',
-  
   // Outras chaves possíveis (hífen em vez de underscore)
   'zetafin-transactions',
   'zetafin-categories',
   'zetafin-user',
-  'zetafin-theme',
-  'zetafin-couple-data',
-  'couple_data',
-  'coupleData'
+  'zetafin-theme'
 ]
 
 /**
@@ -116,7 +106,7 @@ export function executeCompleteSystemCleanup(): CleanupResult {
     // 5. Limpeza adicional de chaves que podem ter escapado
     console.log('🔍 Limpeza adicional de chaves relacionadas...')
     const additionalKeys = [
-      'transacoes', 'categorias', 'dados_ficticios', 'fictitious_data',
+      'transacoes', 'categorias',
       'finance_data', 'financial_data', 'app_data', 'user_preferences'
     ]
     
@@ -144,8 +134,7 @@ export function executeCompleteSystemCleanup(): CleanupResult {
         ALL_STORAGE_KEYS.includes(key) ||
         key.includes('transaction') ||
         key.includes('categor') ||
-        key.includes('dados') ||
-        key.includes('ficticio')
+        key.includes('dados')
       )) {
         remainingKeys.push(key)
       }

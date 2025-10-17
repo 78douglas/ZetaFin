@@ -1,0 +1,382 @@
+[
+  {
+    "id": "1",
+    "descricao": "Salario Joao",
+    "valor": 5000,
+    "tipo": "RECEITA",
+    "data": "2024-10-01",
+    "categoriaId": "7",
+    "usuario": "joao@email.com",
+    "created_at": "2024-10-01T08:00:00.000Z"
+  },
+  {
+    "id": "2",
+    "descricao": "Freelance Design",
+    "valor": 1500,
+    "tipo": "RECEITA",
+    "data": "2024-10-05",
+    "categoriaId": "8",
+    "usuario": "joao@email.com",
+    "created_at": "2024-10-05T14:30:00.000Z"
+  },
+  {
+    "id": "3",
+    "descricao": "Dividendos Investimentos",
+    "valor": 300,
+    "tipo": "RECEITA",
+    "data": "2024-10-10",
+    "categoriaId": "9",
+    "usuario": "joao@email.com",
+    "created_at": "2024-10-10T10:00:00.000Z"
+  },
+  {
+    "id": "4",
+    "descricao": "Supermercado",
+    "valor": 450,
+    "tipo": "DESPESA",
+    "data": "2024-10-02",
+    "categoriaId": "1",
+    "usuario": "joao@email.com",
+    "created_at": "2024-10-02T18:30:00.000Z"
+  },
+  {
+    "id": "5",
+    "descricao": "Gasolina",
+    "valor": 200,
+    "tipo": "DESPESA",
+    "data": "2024-10-03",
+    "categoriaId": "2",
+    "usuario": "joao@email.com",
+    "created_at": "2024-10-03T07:45:00.000Z"
+  },
+  {
+    "id": "6",
+    "descricao": "Aluguel",
+    "valor": 1200,
+    "tipo": "DESPESA",
+    "data": "2024-10-01",
+    "categoriaId": "3",
+    "usuario": "joao@email.com",
+    "created_at": "2024-10-01T09:00:00.000Z"
+  },
+  {
+    "id": "7",
+    "descricao": "Consulta Medica",
+    "valor": 150,
+    "tipo": "DESPESA",
+    "data": "2024-10-04",
+    "categoriaId": "4",
+    "usuario": "joao@email.com",
+    "created_at": "2024-10-04T15:00:00.000Z"
+  },
+  {
+    "id": "8",
+    "descricao": "Curso Online",
+    "valor": 99,
+    "tipo": "DESPESA",
+    "data": "2024-10-06",
+    "categoriaId": "5",
+    "usuario": "joao@email.com",
+    "created_at": "2024-10-06T20:00:00.000Z"
+  },
+  {
+    "id": "9",
+    "descricao": "Cinema",
+    "valor": 80,
+    "tipo": "DESPESA",
+    "data": "2024-10-07",
+    "categoriaId": "6",
+    "usuario": "joao@email.com",
+    "created_at": "2024-10-07T19:30:00.000Z"
+  },
+  {
+    "id": "10",
+    "descricao": "Restaurante",
+    "valor": 120,
+    "tipo": "DESPESA",
+    "data": "2024-10-08",
+    "categoriaId": "1",
+    "usuario": "joao@email.com",
+    "created_at": "2024-10-08T20:00:00.000Z"
+  },
+  {
+    "id": "11",
+    "descricao": "Uber",
+    "valor": 35,
+    "tipo": "DESPESA",
+    "data": "2024-10-09",
+    "categoriaId": "2",
+    "usuario": "joao@email.com",
+    "created_at": "2024-10-09T22:15:00.000Z"
+  },
+  {
+    "id": "12",
+    "descricao": "Conta de Luz",
+    "valor": 180,
+    "tipo": "DESPESA",
+    "data": "2024-10-10",
+    "categoriaId": "3",
+    "usuario": "joao@email.com",
+    "created_at": "2024-10-10T16:00:00.000Z"
+  },
+  {
+    "id": "13",
+    "descricao": "Farmacia",
+    "valor": 65,
+    "tipo": "DESPESA",
+    "data": "2024-10-11",
+    "categoriaId": "4",
+    "usuario": "joao@email.com",
+    "created_at": "2024-10-11T11:30:00.000Z"
+  },
+  {
+    "id": "14",
+    "descricao": "Livros",
+    "valor": 85,
+    "tipo": "DESPESA",
+    "data": "2024-10-12",
+    "categoriaId": "5",
+    "usuario": "joao@email.com",
+    "created_at": "2024-10-12T14:00:00.000Z"
+  },
+  {
+    "id": "15",
+    "descricao": "Academia",
+    "valor": 90,
+    "tipo": "DESPESA",
+    "data": "2024-10-13",
+    "categoriaId": "6",
+    "usuario": "joao@email.com",
+    "created_at": "2024-10-13T06:00:00.000Z"
+  },
+  {
+    "id": "16",
+    "descricao": "Compras Online",
+    "valor": 250,
+    "tipo": "DESPESA",
+    "data": "2024-10-14",
+    "categoriaId": "10",
+    "usuario": "joao@email.com",
+    "created_at": "2024-10-14T16:45:00.000Z"
+  },
+  {
+    "id": "17",
+    "descricao": "Bonus Trabalho",
+    "valor": 800,
+    "tipo": "RECEITA",
+    "data": "2024-10-15",
+    "categoriaId": "7",
+    "usuario": "joao@email.com",
+    "created_at": "2024-10-15T17:00:00.000Z"
+  },
+  {
+    "id": "18",
+    "descricao": "Venda Produto",
+    "valor": 400,
+    "tipo": "RECEITA",
+    "data": "2024-10-16",
+    "categoriaId": "8",
+    "usuario": "joao@email.com",
+    "created_at": "2024-10-16T12:00:00.000Z"
+  },
+  {
+    "id": "19",
+    "descricao": "Padaria",
+    "valor": 25,
+    "tipo": "DESPESA",
+    "data": "2024-10-17",
+    "categoriaId": "1",
+    "usuario": "joao@email.com",
+    "created_at": "2024-10-17T07:30:00.000Z"
+  },
+  {
+    "id": "20",
+    "descricao": "Combustivel",
+    "valor": 180,
+    "tipo": "DESPESA",
+    "data": "2024-10-18",
+    "categoriaId": "2",
+    "usuario": "joao@email.com",
+    "created_at": "2024-10-18T08:00:00.000Z"
+  },
+  {
+    "id": "21",
+    "descricao": "Internet",
+    "valor": 89,
+    "tipo": "DESPESA",
+    "data": "2024-10-19",
+    "categoriaId": "3",
+    "usuario": "joao@email.com",
+    "created_at": "2024-10-19T10:00:00.000Z"
+  },
+  {
+    "id": "22",
+    "descricao": "Dentista",
+    "valor": 200,
+    "tipo": "DESPESA",
+    "data": "2024-10-20",
+    "categoriaId": "4",
+    "usuario": "joao@email.com",
+    "created_at": "2024-10-20T14:30:00.000Z"
+  },
+  {
+    "id": "23",
+    "descricao": "Workshop",
+    "valor": 150,
+    "tipo": "DESPESA",
+    "data": "2024-10-21",
+    "categoriaId": "5",
+    "usuario": "joao@email.com",
+    "created_at": "2024-10-21T09:00:00.000Z"
+  },
+  {
+    "id": "24",
+    "descricao": "Show",
+    "valor": 120,
+    "tipo": "DESPESA",
+    "data": "2024-10-22",
+    "categoriaId": "6",
+    "usuario": "joao@email.com",
+    "created_at": "2024-10-22T21:00:00.000Z"
+  },
+  {
+    "id": "25",
+    "descricao": "Aplicacao CDB",
+    "valor": 1000,
+    "tipo": "DESPESA",
+    "data": "2024-10-23",
+    "categoriaId": "9",
+    "usuario": "joao@email.com",
+    "created_at": "2024-10-23T11:00:00.000Z"
+  },
+  {
+    "id": "26",
+    "descricao": "Mercado",
+    "valor": 380,
+    "tipo": "DESPESA",
+    "data": "2024-10-24",
+    "categoriaId": "1",
+    "usuario": "joao@email.com",
+    "created_at": "2024-10-24T16:00:00.000Z"
+  },
+  {
+    "id": "27",
+    "descricao": "Taxi",
+    "valor": 45,
+    "tipo": "DESPESA",
+    "data": "2024-10-25",
+    "categoriaId": "2",
+    "usuario": "joao@email.com",
+    "created_at": "2024-10-25T23:30:00.000Z"
+  },
+  {
+    "id": "28",
+    "descricao": "Condominio",
+    "valor": 350,
+    "tipo": "DESPESA",
+    "data": "2024-10-26",
+    "categoriaId": "3",
+    "usuario": "joao@email.com",
+    "created_at": "2024-10-26T08:00:00.000Z"
+  },
+  {
+    "id": "29",
+    "descricao": "Exames",
+    "valor": 120,
+    "tipo": "DESPESA",
+    "data": "2024-10-27",
+    "categoriaId": "4",
+    "usuario": "joao@email.com",
+    "created_at": "2024-10-27T09:30:00.000Z"
+  },
+  {
+    "id": "30",
+    "descricao": "Certificacao",
+    "valor": 200,
+    "tipo": "DESPESA",
+    "data": "2024-10-28",
+    "categoriaId": "5",
+    "usuario": "joao@email.com",
+    "created_at": "2024-10-28T15:00:00.000Z"
+  },
+  {
+    "id": "31",
+    "descricao": "Streaming",
+    "valor": 29,
+    "tipo": "DESPESA",
+    "data": "2024-10-29",
+    "categoriaId": "6",
+    "usuario": "joao@email.com",
+    "created_at": "2024-10-29T12:00:00.000Z"
+  },
+  {
+    "id": "32",
+    "descricao": "Diversos",
+    "valor": 75,
+    "tipo": "DESPESA",
+    "data": "2024-10-30",
+    "categoriaId": "10",
+    "usuario": "joao@email.com",
+    "created_at": "2024-10-30T18:00:00.000Z"
+  },
+  {
+    "id": "33",
+    "descricao": "Salario Maria",
+    "valor": 4500,
+    "tipo": "RECEITA",
+    "data": "2024-09-01",
+    "categoriaId": "7",
+    "usuario": "maria@email.com",
+    "created_at": "2024-09-01T08:00:00.000Z"
+  },
+  {
+    "id": "34",
+    "descricao": "Consultoria",
+    "valor": 2000,
+    "tipo": "RECEITA",
+    "data": "2024-09-15",
+    "categoriaId": "8",
+    "usuario": "maria@email.com",
+    "created_at": "2024-09-15T10:00:00.000Z"
+  },
+  {
+    "id": "35",
+    "descricao": "Rendimento Poupanca",
+    "valor": 50,
+    "tipo": "RECEITA",
+    "data": "2024-09-30",
+    "categoriaId": "9",
+    "usuario": "maria@email.com",
+    "created_at": "2024-09-30T23:59:00.000Z"
+  },
+  {
+    "id": "36",
+    "descricao": "Supermercado Setembro",
+    "valor": 600,
+    "tipo": "DESPESA",
+    "data": "2024-09-05",
+    "categoriaId": "1",
+    "usuario": "maria@email.com",
+    "created_at": "2024-09-05T19:00:00.000Z"
+  },
+  {
+    "id": "37",
+    "descricao": "Combustivel Setembro",
+    "valor": 300,
+    "tipo": "DESPESA",
+    "data": "2024-09-10",
+    "categoriaId": "2",
+    "usuario": "maria@email.com",
+    "created_at": "2024-09-10T08:30:00.000Z"
+  },
+  {
+    "id": "38",
+    "descricao": "Aluguel Setembro",
+    "valor": 1200,
+    "tipo": "DESPESA",
+    "data": "2024-09-01",
+    "categoriaId": "3",
+    "usuario": "maria@email.com",
+    "created_at": "2024-09-01T10:00:00.000Z"
+  }
+]

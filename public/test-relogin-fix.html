@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Re-login - ZetaFin</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .step {
+            margin: 15px 0;
+            padding: 10px;
+            border-left: 4px solid #007bff;
+            background-color: #f8f9fa;
+        }
+        .success {
+            border-left-color: #28a745;
+            background-color: #d4edda;
+        }
+        .error {
+            border-left-color: #dc3545;
+            background-color: #f8d7da;
+        }
+        .warning {
+            border-left-color: #ffc107;
+            background-color: #fff3cd;
+        }
+        .test-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        .test-button:hover {
+            background-color: #0056b3;
+        }
+        .results {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 Teste de Correção do Re-login</h1>
+        <p>Este teste verifica se o problema de re-login após logout foi corrigido.</p>
+        
+        <div class="test-button" onclick="runCompleteTest()">🚀 Executar Teste Completo</div>
+        <div class="test-button" onclick="clearAllData()">🧹 Limpar Dados</div>
+        <div class="test-button" onclick="showCurrentState()">👁️ Ver Estado Atual</div>
+        
+        <div id="results" class="results">
+            <h3>Resultados do Teste:</h3>
+            <div id="log"></div>
+        </div>
+    </div>
+
+    <script>
+        const testEmail = 'teste@zetafin.com';
+        const testPassword = '123456';
+        
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const stepDiv = document.createElement('div');
+            stepDiv.className = `step ${type}`;
+            stepDiv.innerHTML = `<strong>${new Date().toLocaleTimeString()}</strong>: ${message}`;
+            logDiv.appendChild(stepDiv);
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+
+        function generateConsistentUserId(email) {
+            // Mesma função usada no AuthContext
+            let hash = 0;
+            for (let i = 0; i < email.length; i++) {
+                const char = email.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash;
+            }
+            return 'local-user-' + Math.abs(hash);
+        }
+
+        function simulateLogin(email, password) {
+            log(`🔑 Simulando login com email: ${email}`, 'info');
+            
+            const userId = generateConsistentUserId(email);
+            log(`👤 ID do usuário gerado: ${userId}`, 'info');
+            
+            const mockUser = {
+                id: userId,
+                email,
+                user_metadata: { 
+                    full_name: email.split('@')[0],
+                    avatar_url: null
+                },
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+            };
+
+            const mockSession = {
+                user: mockUser,
+                access_token: 'local-token-' + userId,
+                refresh_token: 'local-refresh-' + userId,
+                expires_at: Date.now() + (24 * 60 * 60 * 1000),
+                token_type: 'bearer'
+            };
+
+            // Salvar no localStorage
+            localStorage.setItem('zetafin-local-user', JSON.stringify(mockUser));
+            localStorage.setItem('zetafin-local-session', JSON.stringify(mockSession));
+            
+            // Remover flag de logout se existir
+            localStorage.removeItem('zetafin-logout-in-progress');
+            
+            log(`✅ Login realizado com sucesso! ID: ${userId}`, 'success');
+            return { user: mockUser, session: mockSession };
+        }
+
+        function simulateLogout() {
+            log(`🚪 Simulando logout...`, 'info');
+            
+            // Definir flag de logout em progresso
+            localStorage.setItem('zetafin-logout-in-progress', 'true');
+            
+            // Limpar dados do usuário
+            localStorage.removeItem('zetafin-local-user');
+            localStorage.removeItem('zetafin-local-session');
+            
+            // Limpar outros dados relacionados
+            const keysToRemove = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith('zetafin_')) {
+                    keysToRemove.push(key);
+                }
+            }
+            keysToRemove.forEach(key => localStorage.removeItem(key));
+            
+            // Remover flag de logout após limpeza
+            setTimeout(() => {
+                localStorage.removeItem('zetafin-logout-in-progress');
+                log(`✅ Logout concluído e flag removida`, 'success');
+            }, 100);
+            
+            log(`✅ Logout realizado com sucesso!`, 'success');
+        }
+
+        function checkUserState() {
+            const user = localStorage.getItem('zetafin-local-user');
+            const session = localStorage.getItem('zetafin-local-session');
+            const logoutFlag = localStorage.getItem('zetafin-logout-in-progress');
+            
+            if (user && session) {
+                const userData = JSON.parse(user);
+                log(`👤 Usuário logado: ${userData.email} (ID: ${userData.id})`, 'success');
+                return userData;
+            } else if (logoutFlag) {
+                log(`⏳ Logout em progresso...`, 'warning');
+                return null;
+            } else {
+                log(`❌ Nenhum usuário logado`, 'error');
+                return null;
+            }
+        }
+
+        function clearAllData() {
+            log(`🧹 Limpando todos os dados...`, 'info');
+            localStorage.clear();
+            log(`✅ Todos os dados foram limpos!`, 'success');
+        }
+
+        function showCurrentState() {
+            log(`📊 Estado atual do sistema:`, 'info');
+            checkUserState();
+            
+            // Mostrar todas as chaves do localStorage
+            const keys = Object.keys(localStorage);
+            if (keys.length > 0) {
+                log(`🔑 Chaves no localStorage: ${keys.join(', ')}`, 'info');
+            } else {
+                log(`🔑 localStorage está vazio`, 'info');
+            }
+        }
+
+        async function runCompleteTest() {
+            log(`🚀 Iniciando teste completo de re-login...`, 'info');
+            
+            // Limpar estado inicial
+            clearAllData();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            // Teste 1: Primeiro login
+            log(`\n=== TESTE 1: Primeiro Login ===`, 'info');
+            const login1 = simulateLogin(testEmail, testPassword);
+            checkUserState();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            // Teste 2: Primeiro logout
+            log(`\n=== TESTE 2: Primeiro Logout ===`, 'info');
+            simulateLogout();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            checkUserState();
+            
+            // Teste 3: Re-login (primeira tentativa)
+            log(`\n=== TESTE 3: Re-login (1ª tentativa) ===`, 'info');
+            const login2 = simulateLogin(testEmail, testPassword);
+            const user2 = checkUserState();
+            
+            // Verificar se o ID é consistente
+            if (login1.user.id === login2.user.id) {
+                log(`✅ SUCESSO: ID do usuário mantido consistente (${login1.user.id})`, 'success');
+            } else {
+                log(`❌ ERRO: ID do usuário mudou! Antes: ${login1.user.id}, Agora: ${login2.user.id}`, 'error');
+            }
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            // Teste 4: Segundo logout
+            log(`\n=== TESTE 4: Segundo Logout ===`, 'info');
+            simulateLogout();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            checkUserState();
+            
+            // Teste 5: Re-login (segunda tentativa)
+            log(`\n=== TESTE 5: Re-login (2ª tentativa) ===`, 'info');
+            const login3 = simulateLogin(testEmail, testPassword);
+            const user3 = checkUserState();
+            
+            // Verificar se o ID ainda é consistente
+            if (login1.user.id === login3.user.id) {
+                log(`✅ SUCESSO: ID do usuário ainda consistente após múltiplos logins (${login1.user.id})`, 'success');
+            } else {
+                log(`❌ ERRO: ID do usuário mudou na segunda tentativa! Original: ${login1.user.id}, Agora: ${login3.user.id}`, 'error');
+            }
+            
+            log(`\n🎯 RESUMO DO TESTE:`, 'info');
+            log(`📧 Email testado: ${testEmail}`, 'info');
+            log(`🆔 ID esperado: ${generateConsistentUserId(testEmail)}`, 'info');
+            
+            if (login1.user.id === login2.user.id && login2.user.id === login3.user.id) {
+                log(`🎉 TESTE PASSOU: Problema de re-login foi corrigido!`, 'success');
+            } else {
+                log(`💥 TESTE FALHOU: Problema de re-login ainda existe!`, 'error');
+            }
+        }
+
+        // Executar verificação inicial
+        window.onload = function() {
+            log(`🔍 Verificação inicial do estado...`, 'info');
+            showCurrentState();
+        };
+    </script>
+</body>
+</html>

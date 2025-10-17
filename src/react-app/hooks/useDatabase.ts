@@ -35,53 +35,6 @@ export const useDatabase = () => {
     }, timeoutMs)
   }, [resetLoadingState])
 
-  const insertFictitiousData = useCallback(async () => {
-    if (!user) {
-      toast.error('Usuário não autenticado')
-      return { success: false, error: 'Usuário não autenticado' }
-    }
-
-    // Evitar múltiplas chamadas simultâneas
-    if (loading) {
-      toast.warning('Operação já em andamento. Aguarde...')
-      return { success: false, error: 'Operação já em andamento' }
-    }
-
-    try {
-      setLoadingWithTimeout(20000) // 20 segundos de timeout
-      
-      // Cancelar operação anterior se existir
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort()
-      }
-      
-      abortControllerRef.current = new AbortController()
-      
-      const { data, error } = await supabase.rpc('inserir_dados_ficticios', {
-        p_usuario_id: user.id
-      })
-
-      if (error) {
-        throw error
-      }
-
-      toast.success('Dados fictícios inseridos com sucesso!')
-      return { success: true, error: null, data }
-    } catch (err) {
-      if (err.name === 'AbortError') {
-        toast.info('Operação cancelada')
-        return { success: false, error: 'Operação cancelada' }
-      }
-      
-      const errorMessage = err instanceof Error ? err.message : 'Erro ao inserir dados fictícios'
-      toast.error(errorMessage)
-      console.error('Erro ao inserir dados fictícios:', err)
-      return { success: false, error: errorMessage }
-    } finally {
-      resetLoadingState()
-    }
-  }, [user, loading, setLoadingWithTimeout, resetLoadingState])
-
   const resetUserData = useCallback(async () => {
     if (!user) {
       toast.error('Usuário não autenticado')
@@ -205,15 +158,15 @@ export const useDatabase = () => {
             }
 
             const { error } = await supabase
-              .from('transacoes')
+              .from('transactions')
               .insert([{
-                usuario_id: user.id,
-                descricao: transaction.description || transaction.title || 'Transação migrada',
-                valor: Math.abs(transaction.amount || transaction.value || 0),
-                tipo: transaction.type === 'income' || transaction.amount > 0 ? 'RECEITA' : 'DESPESA',
-                data: transaction.date || new Date().toISOString().split('T')[0],
-                categoria_id: categoria_id,
-                observacoes: transaction.notes || null
+                user_id: user.id,
+                description: transaction.description || transaction.title || 'Transação migrada',
+                amount: Math.abs(transaction.amount || transaction.value || 0),
+                type: transaction.type === 'income' || transaction.amount > 0 ? 'RECEITA' : 'DESPESA',
+                transaction_date: transaction.date || new Date().toISOString().split('T')[0],
+                category_id: categoria_id,
+                notes: transaction.notes || null
               }])
 
             if (!error) {
@@ -289,7 +242,6 @@ export const useDatabase = () => {
 
   return {
     loading,
-    insertFictitiousData,
     resetUserData,
     migrateLocalStorageData,
     checkLocalStorageData,

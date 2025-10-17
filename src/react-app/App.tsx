@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Layout from "@/react-app/components/Layout";
 import Dashboard from "@/react-app/pages/Dashboard";
 import Transactions from "@/react-app/pages/Transactions";
@@ -13,12 +13,13 @@ import GoalsTracking from "@/react-app/pages/GoalsTracking";
 import FrequentExpenses from "@/react-app/pages/FrequentExpenses";
 import Profile from "@/react-app/pages/Profile";
 import Settings from "@/react-app/pages/Settings";
-import CoupleData from "@/react-app/pages/CoupleData";
+
 import Help from "@/react-app/pages/Help";
 import Login from "@/react-app/pages/Login";
-import Register from "@/react-app/pages/Register";
-import ForgotPassword from "@/react-app/pages/ForgotPassword";
+import AuthCallback from "@/react-app/pages/AuthCallback";
 import ProtectedRoute from "@/react-app/components/ProtectedRoute";
+import TestMenu from "@/react-app/components/TestMenu";
+import MigrationModal from "@/react-app/components/MigrationModal";
 import { ThemeProvider } from "@/react-app/contexts/ThemeContext";
 import { EditModeProvider } from "@/react-app/contexts/EditModeContext";
 import { ExportProvider } from "@/react-app/contexts/ExportContext";
@@ -35,117 +36,86 @@ export default function App() {
               <Routes>
                 {/* Rotas públicas */}
                 <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/auth/callback" element={<AuthCallback />} />
                 
-                {/* Rotas protegidas */}
+                {/* Rota de teste do menu */}
+                <Route path="/test-menu" element={<TestMenu />} />
+                
+                {/* Rotas principais - acesso livre */}
                 <Route path="/" element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <Dashboard />
-                    </Layout>
-                  </ProtectedRoute>
+                  <Layout>
+                    <Dashboard />
+                  </Layout>
                 } />
                 <Route path="/transacoes" element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <Transactions />
-                    </Layout>
-                  </ProtectedRoute>
+                  <Layout>
+                    <Transactions />
+                  </Layout>
                 } />
                 <Route path="/nova-transacao" element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <NewTransaction />
-                    </Layout>
-                  </ProtectedRoute>
+                  <Layout>
+                    <NewTransaction />
+                  </Layout>
                 } />
                 <Route path="/editar-transacao/:id" element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <EditTransaction />
-                    </Layout>
-                  </ProtectedRoute>
+                  <Layout>
+                    <EditTransaction />
+                  </Layout>
                 } />
                 <Route path="/relatorios" element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <Reports />
-                    </Layout>
-                  </ProtectedRoute>
+                  <Layout>
+                    <Reports />
+                  </Layout>
                 } />
                 <Route path="/relatorios/mensal" element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <MonthlyReport />
-                    </Layout>
-                  </ProtectedRoute>
+                  <Layout>
+                    <MonthlyReport />
+                  </Layout>
                 } />
                 <Route path="/relatorios/periodo" element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <PeriodReport />
-                    </Layout>
-                  </ProtectedRoute>
+                  <Layout>
+                    <PeriodReport />
+                  </Layout>
                 } />
                 <Route path="/relatorios/categorias" element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <CategoryAnalysis />
-                    </Layout>
-                  </ProtectedRoute>
+                  <Layout>
+                    <CategoryAnalysis />
+                  </Layout>
                 } />
                 <Route path="/relatorios/tendencias" element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <TrendsProjections />
-                    </Layout>
-                  </ProtectedRoute>
+                  <Layout>
+                    <TrendsProjections />
+                  </Layout>
                 } />
                 <Route path="/relatorios/metas" element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <GoalsTracking />
-                    </Layout>
-                  </ProtectedRoute>
+                  <Layout>
+                    <GoalsTracking />
+                  </Layout>
                 } />
                 <Route path="/relatorios/frequentes" element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <FrequentExpenses />
-                    </Layout>
-                  </ProtectedRoute>
+                  <Layout>
+                    <FrequentExpenses />
+                  </Layout>
                 } />
                 <Route path="/perfil" element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <Profile />
-                    </Layout>
-                  </ProtectedRoute>
+                  <Layout>
+                    <Profile />
+                  </Layout>
                 } />
                 <Route path="/perfil/configuracoes" element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <Settings />
-                    </Layout>
-                  </ProtectedRoute>
+                  <Layout>
+                    <Settings />
+                  </Layout>
                 } />
-                <Route path="/perfil/dados-casal" element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <CoupleData />
-                    </Layout>
-                  </ProtectedRoute>
-                } />
+
                 <Route path="/perfil/ajuda" element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <Help />
-                    </Layout>
-                  </ProtectedRoute>
+                  <Layout>
+                    <Help />
+                  </Layout>
                 } />
               </Routes>
             </Router>
+            <MigrationModal />
             <Toaster position="top-right" richColors />
           </EditModeProvider>
         </ExportProvider>

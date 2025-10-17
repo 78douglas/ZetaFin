@@ -1,5 +1,5 @@
-import { Settings, Heart, HelpCircle, LogOut, User } from 'lucide-react';
-import { Link, useNavigate } from 'react-router';
+import { Settings, HelpCircle, LogOut, User, Heart } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import { STORAGE_KEYS } from '@/react-app/lib/config';
 
 export default function Profile() {
@@ -24,13 +24,6 @@ export default function Profile() {
       path: '/perfil/configuracoes'
     },
 
-    {
-      icon: Heart,
-      title: 'Dados do Casal',
-      description: 'Informações compartilhadas',
-      color: 'text-pink-600',
-      path: '/perfil/dados-casal'
-    },
     {
       icon: HelpCircle,
       title: 'Ajuda',

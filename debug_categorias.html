@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Categorias - ZetaFin</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1a1a;
+            color: #fff;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .debug-section {
+            background: #2a2a2a;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border-left: 4px solid #ef4444;
+        }
+        pre {
+            background: #000;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+        .btn {
+            background: #ef4444;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        .btn:hover {
+            background: #dc2626;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Debug das Categorias - ZetaFin</h1>
+        
+        <div class="debug-section">
+            <h2>Investigação do Problema das Categorias</h2>
+            <p>Este script vai investigar por que todas as transações aparecem como "Outros".</p>
+            <button class="btn" onclick="executarInvestigacao()">🔍 Executar Investigação</button>
+            <button class="btn" onclick="limparConsole()">🧹 Limpar Console</button>
+        </div>
+
+        <div class="debug-section">
+            <h3>Resultados da Investigação:</h3>
+            <pre id="resultados">Clique em "Executar Investigação" para ver os resultados...</pre>
+        </div>
+    </div>
+
+    <script>
+        function limparConsole() {
+            console.clear();
+            document.getElementById('resultados').textContent = 'Console limpo. Execute a investigação novamente.';
+        }
+
+        function executarInvestigacao() {
+            const resultadosDiv = document.getElementById('resultados');
+            let output = '';
+            
+            // Capturar console.log
+            const originalLog = console.log;
+            console.log = function(...args) {
+                originalLog.apply(console, args);
+                output += args.join(' ') + '\n';
+                resultadosDiv.textContent = output;
+            };
+
+            try {
+                // Script de investigação
+                console.log('🔍 INVESTIGAÇÃO PROFUNDA - Problema das Categorias');
+                console.log('================================================');
+
+                // 1. Verificar dados no localStorage
+                console.log('\n📦 1. DADOS NO LOCALSTORAGE:');
+                const transacoes = localStorage.getItem('zetafin_transactions');
+                const categorias = localStorage.getItem('zetafin_categories');
+
+                console.log('Transações raw:', transacoes ? 'EXISTEM' : 'NÃO EXISTEM');
+                console.log('Categorias raw:', categorias ? 'EXISTEM' : 'NÃO EXISTEM');
+
+                if (transacoes) {
+                    const transacoesParsed = JSON.parse(transacoes);
+                    console.log('\n💰 TRANSAÇÕES DETALHADAS:');
+                    transacoesParsed.forEach((t, index) => {
+                        console.log(`Transação ${index + 1}:`, {
+                            id: t.id,
+                            descricao: t.descricao,
+                            valor: t.valor,
+                            tipo: t.tipo,
+                            categoria_id: t.categoria_id,
+                            categoria_id_type: typeof t.categoria_id,
+                            data: t.data
+                        });
+                    });
+                }
+
+                if (categorias) {
+                    const categoriasParsed = JSON.parse(categorias);
+                    console.log('\n🏷️ CATEGORIAS DETALHADAS:');
+                    categoriasParsed.forEach((c, index) => {
+                        console.log(`Categoria ${index + 1}:`, {
+                            id: c.id,
+                            id_type: typeof c.id,
+                            nome: c.nome,
+                            tipo_padrao: c.tipo_padrao,
+                            icone: c.icone,
+                            ativa: c.ativa
+                        });
+                    });
+                }
+
+                // 2. Testar função obterCategoria
+                console.log('\n🔧 2. TESTE DA FUNÇÃO obterCategoria:');
+                if (categorias) {
+                    const categoriasParsed = JSON.parse(categorias);
+                    
+                    // Simular a função obterCategoria
+                    const obterCategoria = (id) => {
+                        console.log(`Buscando categoria com ID: "${id}" (tipo: ${typeof id})`);
+                        const categoria = categoriasParsed.find(cat => cat.id === id);
+                        console.log('Categoria encontrada:', categoria ? categoria.nome : 'NÃO ENCONTRADA');
+                        return categoria;
+                    };
+                    
+                    // Testar com diferentes tipos de ID
+                    if (transacoes) {
+                        const transacoesParsed = JSON.parse(transacoes);
+                        transacoesParsed.forEach((t, index) => {
+                            console.log(`\nTeste ${index + 1} - Transação: ${t.descricao}`);
+                            console.log(`categoria_id: "${t.categoria_id}" (${typeof t.categoria_id})`);
+                            
+                            // Teste direto
+                            const resultado1 = obterCategoria(t.categoria_id);
+                            
+                            // Teste convertendo para string
+                            const resultado2 = obterCategoria(String(t.categoria_id));
+                            
+                            // Teste convertendo para number
+                            const resultado3 = obterCategoria(Number(t.categoria_id));
+                            
+                            console.log('Resultados:', {
+                                direto: resultado1?.nome || 'NÃO ENCONTRADO',
+                                string: resultado2?.nome || 'NÃO ENCONTRADO', 
+                                number: resultado3?.nome || 'NÃO ENCONTRADO'
+                            });
+                        });
+                    }
+                }
+
+                // 3. Verificar mapeamento atual
+                console.log('\n🗺️ 3. MAPEAMENTO CATEGORIA_ID → CATEGORIA:');
+                if (transacoes && categorias) {
+                    const transacoesParsed = JSON.parse(transacoes);
+                    const categoriasParsed = JSON.parse(categorias);
+                    
+                    console.log('IDs das categorias disponíveis:', categoriasParsed.map(c => `"${c.id}" (${typeof c.id})`));
+                    console.log('IDs usados nas transações:', transacoesParsed.map(t => `"${t.categoria_id}" (${typeof t.categoria_id})`));
+                    
+                    // Verificar correspondências
+                    transacoesParsed.forEach(transacao => {
+                        const categoriaEncontrada = categoriasParsed.find(cat => cat.id === transacao.categoria_id);
+                        console.log(`Transação "${transacao.descricao}":`, {
+                            categoria_id_usado: transacao.categoria_id,
+                            categoria_encontrada: categoriaEncontrada ? categoriaEncontrada.nome : '❌ NÃO ENCONTRADA',
+                            problema: !categoriaEncontrada ? 'CATEGORIA NÃO EXISTE OU ID INCOMPATÍVEL' : '✅ OK'
+                        });
+                    });
+                }
+
+                console.log('\n🎯 4. DIAGNÓSTICO FINAL:');
+                console.log('Investigação concluída! Analise os resultados acima.');
+
+            } catch (error) {
+                console.log('❌ ERRO na investigação:', error.message);
+            } finally {
+                // Restaurar console.log original
+                console.log = originalLog;
+            }
+        }
+    </script>
+</body>

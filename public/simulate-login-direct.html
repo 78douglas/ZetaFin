@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simular Login Direto</title>
+</head>
+<body>
+    <h1>Simulando Login Direto</h1>
+    <p>Criando dados de usuário no localStorage...</p>
+    
+    <script>
+        console.log("=== SIMULANDO LOGIN DIRETO ===");
+        
+        // Criar dados de usuário mock
+        const mockUser = {
+            id: 'local-user-' + Date.now(),
+            email: 'teste@email.com',
+            user_metadata: { 
+                full_name: 'teste',
+                avatar_url: null
+            },
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+        };
+        
+        const mockSession = {
+            user: mockUser,
+            access_token: 'local-token-' + Date.now(),
+            refresh_token: 'local-refresh-' + Date.now(),
+            expires_at: Date.now() + (24 * 60 * 60 * 1000), // 24 horas
+            token_type: 'bearer'
+        };
+        
+        // Salvar no localStorage
+        localStorage.setItem('zetafin-local-user', JSON.stringify(mockUser));
+        localStorage.setItem('zetafin-local-session', JSON.stringify(mockSession));
+        
+        console.log("Dados salvos no localStorage:");
+        console.log("User:", mockUser);
+        console.log("Session:", mockSession);
+        
+        // Redirecionar para dashboard
+        setTimeout(() => {
+            console.log("Redirecionando para dashboard...");
+            window.location.href = '/';
+        }, 1000);
+    </script>
+</body>
+</html>

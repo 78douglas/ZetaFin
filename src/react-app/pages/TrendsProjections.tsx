@@ -9,21 +9,16 @@ import {
   TrendingUp, TrendingDown, Calendar, ArrowLeft, Download, 
   AlertTriangle, CheckCircle
 } from 'lucide-react';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
+import BrazilianDateInput from '@/react-app/components/BrazilianDateInput';
+import { DATE_UTILS } from '@/react-app/lib/config';
 
 export default function TrendsProjections() {
   const { transacoes } = useFinanceDataHybrid();
   const [periodoAnalise, setPeriodoAnalise] = useState(6);
   const [tipoPeriodo, setTipoPeriodo] = useState<'predefinido' | 'personalizado'>('predefinido');
-  const [dataInicio, setDataInicio] = useState(() => {
-    const hoje = new Date();
-    const seiseMesesAtras = new Date(hoje.getFullYear(), hoje.getMonth() - 6, 1);
-    return seiseMesesAtras.toISOString().split('T')[0];
-  });
-  const [dataFim, setDataFim] = useState(() => {
-    const hoje = new Date();
-    return hoje.toISOString().split('T')[0];
-  }); // meses
+  const [dataInicio, setDataInicio] = useState(DATE_UTILS.getMonthsAgo(1));
+  const [dataFim, setDataFim] = useState(DATE_UTILS.getCurrentMonthEnd());
 
   const formatarMoeda = (valor: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -45,8 +40,9 @@ export default function TrendsProjections() {
       inicio = new Date(dataInicio);
       fim = new Date(dataFim);
     } else {
-      inicio = new Date(agora.getFullYear(), agora.getMonth() - periodoAnalise, 1);
-      fim = agora;
+      // Usar período dos últimos 3 meses incluindo o atual
+      inicio = new Date(agora.getFullYear(), agora.getMonth() - 2, 1); // 3 meses atrás
+      fim = new Date(agora.getFullYear(), agora.getMonth() + 1, 0); // final do mês atual
     }
     
     const transacoesPeriodo = transacoes.filter(t => {
@@ -56,14 +52,23 @@ export default function TrendsProjections() {
     
     // Dados mensais para tendências
     const dadosMensais = [];
-    for (let i = periodoAnalise - 1; i >= 0; i--) {
+    
+    // Usar período baseado nos últimos 3 meses
+    const mesesDisponiveis = [];
+    for (let i = 2; i >= 0; i--) {
       const data = new Date(agora.getFullYear(), agora.getMonth() - i, 1);
-      const mesAno = `${String(data.getMonth() + 1).padStart(2, '0')}/${data.getFullYear()}`;
-      
+      mesesDisponiveis.push({
+        mes: data.getMonth() + 1,
+        ano: data.getFullYear(),
+        nome: `${String(data.getMonth() + 1).padStart(2, '0')}/${data.getFullYear()}`
+      });
+    }
+    
+    for (const mesInfo of mesesDisponiveis) {
       const transacoesMes = transacoesPeriodo.filter(t => {
         const dataTransacao = new Date(t.data);
-        return dataTransacao.getMonth() === data.getMonth() && 
-               dataTransacao.getFullYear() === data.getFullYear();
+        return dataTransacao.getMonth() === (mesInfo.mes - 1) && 
+               dataTransacao.getFullYear() === mesInfo.ano;
       });
       
       const receitas = transacoesMes
@@ -75,7 +80,7 @@ export default function TrendsProjections() {
         .reduce((sum, t) => sum + t.valor, 0);
       
       dadosMensais.push({
-        mes: mesAno,
+        mes: mesInfo.nome,
         receitas,
         despesas,
         saldo: receitas - despesas
@@ -231,26 +236,17 @@ export default function TrendsProjections() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex items-center space-x-2">
-                  <Calendar className="w-5 h-5 text-gray-400" />
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Data Início:</label>
-                  <input
-                    type="date"
-                    value={dataInicio}
-                    onChange={(e) => setDataInicio(e.target.value)}
-                    className="border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Calendar className="w-5 h-5 text-gray-400" />
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Data Fim:</label>
-                  <input
-                    type="date"
-                    value={dataFim}
-                    onChange={(e) => setDataFim(e.target.value)}
-                    className="border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
+                <BrazilianDateInput
+                  label="Data Início"
+                  value={dataInicio}
+                  onChange={setDataInicio}
+                />
+                
+                <BrazilianDateInput
+                  label="Data Fim"
+                  value={dataFim}
+                  onChange={setDataFim}
+                />
               </div>
             )}
           </div>
@@ -328,7 +324,7 @@ export default function TrendsProjections() {
                 stroke="#10B981" 
                 strokeWidth={2}
                 name="Receitas"
-                strokeDasharray={(entry: any) => entry?.isProjecao ? "5 5" : "0"}
+                strokeDasharray="0"
               />
               <Line 
                 type="monotone" 
@@ -336,7 +332,7 @@ export default function TrendsProjections() {
                 stroke="#EF4444" 
                 strokeWidth={2}
                 name="Despesas"
-                strokeDasharray={(entry: any) => entry?.isProjecao ? "5 5" : "0"}
+                strokeDasharray="0"
               />
               <Line 
                 type="monotone" 
@@ -344,7 +340,7 @@ export default function TrendsProjections() {
                 stroke="#3B82F6" 
                 strokeWidth={2}
                 name="Saldo"
-                strokeDasharray={(entry: any) => entry?.isProjecao ? "5 5" : "0"}
+                strokeDasharray="0"
               />
             </LineChart>
           </ResponsiveContainer>

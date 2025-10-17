@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useFinanceDataHybrid } from '@/react-app/hooks/useFinanceDataHybrid';
 import {
   ResponsiveContainer,
@@ -7,8 +7,9 @@ import {
 import { 
   Calendar, ArrowLeft, PieChart as PieChartIcon
 } from 'lucide-react';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 import { TipoTransacao } from '@/shared/types';
+import { DATE_UTILS } from '@/react-app/lib/config';
 
 const CORES = [
   '#ef4444', '#f97316', '#eab308', '#22c55e', 
@@ -17,13 +18,17 @@ const CORES = [
 ];
 
 export default function CategoryAnalysis() {
-  const { transacoes, obterCategoria } = useFinanceDataHybrid();
+  const { transacoes, obterCategoria, recarregarDados } = useFinanceDataHybrid();
   
-  // Estado para o mês/ano selecionado
-  const [mesSelecionado, setMesSelecionado] = useState(() => {
-    const agora = new Date();
-    return `${agora.getFullYear()}-${String(agora.getMonth() + 1).padStart(2, '0')}`;
-  });
+  // Estado para o mês/ano selecionado (usar mês atual)
+  const [mesSelecionado, setMesSelecionado] = useState(DATE_UTILS.getCurrentMonth());
+
+  // Remover verificação de dados fictícios - agora usa apenas Supabase
+  useEffect(() => {
+    // Dados serão carregados automaticamente pelo hook híbrido
+  }, []);
+
+
 
   // Função para formatar moeda
   const formatarMoeda = (valor: number) => {
@@ -49,7 +54,7 @@ export default function CategoryAnalysis() {
 
     // Agrupar por categoria
     const categoriasMap = transacoesMes.reduce((acc, transacao) => {
-      const categoria = obterCategoria(transacao.categoriaId);
+      const categoria = obterCategoria(transacao.categoria_id);
       const nomeCategoria = categoria?.nome || 'Outros';
       const iconeCategoria = categoria?.icone || '📝';
       

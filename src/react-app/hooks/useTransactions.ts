@@ -1,19 +1,19 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { supabase } from '../lib/supabase'
-import { Transacao } from '../lib/supabase'
+import { Transaction } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import { toast } from 'sonner'
 
 export interface TransactionFilters {
   startDate?: string
   endDate?: string
-  categoria_id?: string
-  tipo?: 'RECEITA' | 'DESPESA'
-  descricao?: string
+  category_id?: string
+  type?: 'RECEITA' | 'DESPESA'
+  description?: string
 }
 
 export const useTransactions = (filters?: TransactionFilters) => {
-  const [transactions, setTransactions] = useState<Transacao[]>([])
+  const [transactions, setTransactions] = useState<Transaction[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { user } = useAuth()
@@ -39,30 +39,31 @@ export const useTransactions = (filters?: TransactionFilters) => {
       setError(null)
 
       let query = supabase
-        .from('transacoes')
+        .from('transactions')
         .select(`
           *,
-          categoria:categorias(*)
+          category:categories(*),
+          tags
         `)
-        .eq('usuario_id', user.id)
-        .order('data', { ascending: false })
+        .eq('user_id', user.id)
+        .order('transaction_date', { ascending: false })
         .limit(100) // Limitar a 100 transações para evitar sobrecarga
 
       // Aplicar filtros
       if (memoizedFilters?.startDate) {
-        query = query.gte('data', memoizedFilters.startDate)
+        query = query.gte('transaction_date', memoizedFilters.startDate)
       }
       if (memoizedFilters?.endDate) {
-        query = query.lte('data', memoizedFilters.endDate)
+        query = query.lte('transaction_date', memoizedFilters.endDate)
       }
-      if (memoizedFilters?.categoria_id) {
-        query = query.eq('categoria_id', memoizedFilters.categoria_id)
+      if (memoizedFilters?.category_id) {
+        query = query.eq('category_id', memoizedFilters.category_id)
       }
-      if (memoizedFilters?.tipo) {
-        query = query.eq('tipo', memoizedFilters.tipo)
+      if (memoizedFilters?.type) {
+        query = query.eq('type', memoizedFilters.type)
       }
-      if (memoizedFilters?.descricao) {
-        query = query.ilike('descricao', `%${memoizedFilters.descricao}%`)
+      if (memoizedFilters?.description) {
+        query = query.ilike('description', `%${memoizedFilters.description}%`)
       }
 
       const { data, error } = await query
@@ -82,7 +83,7 @@ export const useTransactions = (filters?: TransactionFilters) => {
     }
   }, [user, memoizedFilters])
 
-  const createTransaction = async (transacao: Omit<Transacao, 'id' | 'created_at' | 'updated_at' | 'usuario_id'>) => {
+  const createTransaction = async (transacao: Omit<Transaction, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => {
     if (!user) {
       toast.error('Usuário não autenticado')
       return { data: null, error: 'Usuário não autenticado' }
@@ -90,14 +91,15 @@ export const useTransactions = (filters?: TransactionFilters) => {
 
     try {
       const { data, error } = await supabase
-        .from('transacoes')
+        .from('transactions')
         .insert([{
           ...transacao,
-          usuario_id: user.id
+          user_id: user.id
         }])
         .select(`
           *,
-          categoria:categorias(*)
+          category:categories(*),
+          tags
         `)
         .single()
 
@@ -106,7 +108,6 @@ export const useTransactions = (filters?: TransactionFilters) => {
       }
 
       setTransactions(prev => [data, ...prev])
-      toast.success('Transação criada com sucesso!')
       return { data, error: null }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erro ao criar transação'
@@ -116,16 +117,17 @@ export const useTransactions = (filters?: TransactionFilters) => {
     }
   }
 
-  const updateTransaction = async (id: string, updates: Partial<Omit<Transacao, 'id' | 'created_at' | 'updated_at' | 'usuario_id'>>) => {
+  const updateTransaction = async (id: string, updates: Partial<Omit<Transaction, 'id' | 'created_at' | 'updated_at' | 'user_id'>>) => {
     try {
       const { data, error } = await supabase
-        .from('transacoes')
+        .from('transactions')
         .update(updates)
         .eq('id', id)
-        .eq('usuario_id', user?.id)
+        .eq('user_id', user?.id)
         .select(`
           *,
-          categoria:categorias(*)
+          category:categories(*),
+          tags
         `)
         .single()
 
@@ -136,7 +138,6 @@ export const useTransactions = (filters?: TransactionFilters) => {
       setTransactions(prev => 
         prev.map(trans => trans.id === id ? data : trans)
       )
-      toast.success('Transação atualizada com sucesso!')
       return { data, error: null }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erro ao atualizar transação'
@@ -149,10 +150,10 @@ export const useTransactions = (filters?: TransactionFilters) => {
   const deleteTransaction = async (id: string) => {
     try {
       const { error } = await supabase
-        .from('transacoes')
+        .from('transactions')
         .delete()
         .eq('id', id)
-        .eq('usuario_id', user?.id)
+        .eq('user_id', user?.id)
 
       if (error) {
         throw error

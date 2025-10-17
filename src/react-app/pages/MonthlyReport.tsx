@@ -1,23 +1,19 @@
 import { useState, useMemo } from 'react';
+import { ArrowLeft, Download, Calendar, DollarSign, Filter, TrendingUp, TrendingDown } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useFinanceDataHybrid } from '@/react-app/hooks/useFinanceDataHybrid';
 import { TipoTransacao } from '@/shared/types';
-import { 
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, LineChart, Line, Legend
-} from 'recharts';
-import { 
-  Calendar, TrendingUp, TrendingDown, DollarSign, 
-  ArrowLeft, Download, Filter 
-} from 'lucide-react';
-import { Link } from 'react-router';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
+import { useExport } from '@/react-app/contexts/ExportContext';
+import { DATE_UTILS } from '@/react-app/lib/config';
 
 export default function MonthlyReport() {
   const { transacoes, obterCategoria } = useFinanceDataHybrid();
   
   // Estado para filtros
   const [mesAno, setMesAno] = useState(() => {
-    const hoje = new Date();
-    return `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}`;
+    // Usar o mês atual como padrão
+    return DATE_UTILS.getCurrentMonth();
   });
 
   // Dados do relatório mensal
@@ -26,9 +22,9 @@ export default function MonthlyReport() {
     const inicioMes = new Date(ano, mes - 1, 1);
     const fimMes = new Date(ano, mes, 0);
     
-    const transacoesMes = transacoes.filter(t => {
-      const dataTransacao = new Date(t.data);
-      return dataTransacao >= inicioMes && dataTransacao <= fimMes;
+    const transacoesMes = transacoes.filter(transacao => {
+      const dataTransacao = new Date(transacao.data);
+      return dataTransacao.getFullYear() === ano && dataTransacao.getMonth() === mes - 1;
     });
 
     // Estatísticas básicas
@@ -39,13 +35,14 @@ export default function MonthlyReport() {
     const totalDespesas = despesas.reduce((sum, t) => sum + t.valor, 0);
     const saldo = totalReceitas - totalDespesas;
 
+
     // Maior receita e despesa
     const maiorReceita = receitas.reduce((max, t) => t.valor > max.valor ? t : max, receitas[0] || { valor: 0, descricao: 'N/A' });
     const maiorDespesa = despesas.reduce((max, t) => t.valor > max.valor ? t : max, despesas[0] || { valor: 0, descricao: 'N/A' });
 
     // Dados por categoria
     const gastosPorCategoria = despesas.reduce((acc, transacao) => {
-      const categoria = obterCategoria(transacao.categoriaId);
+      const categoria = obterCategoria(transacao.categoria_id);
       const nomeCategoria = categoria?.nome || 'Outros';
       const iconeCategoria = categoria?.icone || '📝';
       
@@ -61,7 +58,7 @@ export default function MonthlyReport() {
     }, {} as Record<string, { nome: string; icone: string; valor: number }>);
 
     const receitasPorCategoria = receitas.reduce((acc, transacao) => {
-      const categoria = obterCategoria(transacao.categoriaId);
+      const categoria = obterCategoria(transacao.categoria_id);
       const nomeCategoria = categoria?.nome || 'Outros';
       acc[nomeCategoria] = (acc[nomeCategoria] || 0) + transacao.valor;
       return acc;
@@ -364,7 +361,7 @@ export default function MonthlyReport() {
                 {dadosRelatorio.transacoesMes
                   .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime())
                   .map((transacao, index) => {
-                    const categoria = obterCategoria(transacao.categoriaId);
+                    const categoria = obterCategoria(transacao.categoria_id);
                     const dataFormatada = new Date(transacao.data).toLocaleDateString('pt-BR');
                     
                     return (

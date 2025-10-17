@@ -13,23 +13,25 @@ export default function ExpensesByCategory() {
   const { transacoes, obterCategoria } = useFinanceDataHybrid({ limit: 200 });
 
   const despesasPorCategoria = useMemo(() => {
-    // Filtrar transações do mês atual
+    // Filtrar transações dos últimos 3 meses
     const agora = new Date();
-    const inicioMes = new Date(agora.getFullYear(), agora.getMonth(), 1);
-    const fimMes = new Date(agora.getFullYear(), agora.getMonth() + 1, 0);
+    const inicioAnalise = new Date(agora.getFullYear(), agora.getMonth() - 2, 1); // 3 meses atrás
+    const fimAnalise = agora;
 
-    const transacoesMesAtual = transacoes.filter(t => {
+    const transacoesAnalise = transacoes.filter(t => {
       const dataTransacao = new Date(t.data);
       return t.tipo === 'DESPESA' && 
-             dataTransacao >= inicioMes && 
-             dataTransacao <= fimMes;
+             dataTransacao >= inicioAnalise && 
+             dataTransacao <= fimAnalise;
     });
 
     // Agrupar por categoria
-    const categoriasMap = transacoesMesAtual.reduce((acc, transacao) => {
-      const categoria = transacao.categoria || obterCategoria(transacao.categoria_id);
-      const nomeCategoria = categoria?.nome || 'Outros';
-      const iconeCategoria = categoria?.icone || '📝';
+    const categoriasMap = transacoesAnalise.reduce((acc, transacao) => {
+      const categoria = obterCategoria(transacao.categoria_id);
+      
+      // Compatibilidade: categorias padrão usam 'name' e 'icon', categorias locais usam 'nome' e 'icone'
+      const nomeCategoria = categoria?.name || categoria?.nome || 'Outros';
+      const iconeCategoria = categoria?.icon || categoria?.icone || '📝';
       
       if (!acc[nomeCategoria]) {
         acc[nomeCategoria] = {
@@ -38,7 +40,7 @@ export default function ExpensesByCategory() {
           valor: 0
         };
       }
-      acc[nomeCategoria].valor += transacao.valor;
+      acc[nomeCategoria].valor += Math.abs(transacao.valor);
       return acc;
     }, {} as Record<string, { nome: string; icone: string; valor: number }>);
 
@@ -80,7 +82,7 @@ export default function ExpensesByCategory() {
   if (despesasPorCategoria.length === 0) {
     return (
       <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Despesas por Categoria (Mês Atual)</h3>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Despesas por Categoria</h3>
         <div className="text-center py-8">
           <div className="text-4xl mb-2">📊</div>
           <p className="text-gray-500 dark:text-gray-400">Nenhuma despesa registrada este mês</p>
@@ -91,7 +93,7 @@ export default function ExpensesByCategory() {
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Despesas por Categoria (Mês Atual)</h3>
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Despesas por Categoria</h3>
       
       <div className="h-80 mb-4">
         <ResponsiveContainer width="100%" height="100%">

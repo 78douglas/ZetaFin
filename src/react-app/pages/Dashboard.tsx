@@ -1,38 +1,29 @@
+import React, { useEffect, memo, useState } from 'react';
 import { useFinanceDataHybrid } from '@/react-app/hooks/useFinanceDataHybrid';
 import { useCategoriesHybrid } from '@/react-app/hooks/useFinanceDataHybrid';
 import BalanceCard from '@/react-app/components/BalanceCard';
 import ExpensesByCategory from '@/react-app/components/ExpensesByCategory';
-import { Receipt, Database } from 'lucide-react';
-import { Link } from 'react-router';
+import { Receipt, Database, Users, User, ChevronDown } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
-import { useEffect } from 'react';
 import { executeCompleteSystemCleanup } from '@/react-app/utils/cleanupSystem';
 
-export default function Dashboard() {
+import { DATE_UTILS } from '@/react-app/lib/config';
+
+const Dashboard = memo(() => {
   // Limitar a 50 transações no Dashboard para melhor performance
   const { loading, estatisticas, transacoes, obterCategoria, recarregarDados } = useFinanceDataHybrid({ limit: 50 });
   const { categories } = useCategoriesHybrid();
+  
+  // Estado para teste do menu
+  const [showTestMenu, setShowTestMenu] = useState(false);
 
   // Limpeza automática removida - sistema já foi limpo
 
-  // Função para inserir dados reais do JSON automaticamente
-  const inserirDadosReaisJSON = async () => {
-    try {
-      console.log('🚀 INICIANDO inserção automática de dados reais do JSON...');
-      
-      // Dados reais fornecidos pelo usuário
-      const dadosJSON = [
+  // Dados de exemplo para demonstração
+  const exemploTransacoes = [
         {
-          "data": "2025-07-01",
-          "tipo": "Pagamento",
-          "descricao": "Supermercado",
-          "categoria": "Alimentação",
-          "valor": 325.40,
-          "pago_por": "Ana",
-          "observacoes": "Compras semanais"
-        },
-        {
-          "data": "2025-07-02",
+          "data": "2025-06-01",
           "tipo": "Recebimento",
           "descricao": "Salário Ana",
           "categoria": "Renda",
@@ -41,7 +32,7 @@ export default function Dashboard() {
           "observacoes": "Salário mensal"
         },
         {
-          "data": "2025-07-03",
+          "data": "2025-06-01",
           "tipo": "Recebimento",
           "descricao": "Salário João",
           "categoria": "Renda",
@@ -50,18 +41,36 @@ export default function Dashboard() {
           "observacoes": "Salário mensal"
         },
         {
-          "data": "2025-07-04",
+          "data": "2025-06-02",
           "tipo": "Pagamento",
-          "descricao": "Conta de luz",
-          "categoria": "Moradia",
-          "valor": 210.35,
-          "pago_por": "João",
-          "observacoes": "Conta compartilhada"
+          "descricao": "Supermercado",
+          "categoria": "Alimentação",
+          "valor": 320.50,
+          "pago_por": "Ana",
+          "observacoes": "Compras da semana"
         },
         {
-          "data": "2025-07-06",
+          "data": "2025-06-05",
           "tipo": "Pagamento",
-          "descricao": "Jantar fora",
+          "descricao": "Aluguel",
+          "categoria": "Moradia",
+          "valor": 2000.00,
+          "pago_por": "João",
+          "observacoes": "Apartamento 2 quartos"
+        },
+        {
+          "data": "2025-06-07",
+          "tipo": "Pagamento",
+          "descricao": "Conta de energia",
+          "categoria": "Moradia",
+          "valor": 180.30,
+          "pago_por": "Ana",
+          "observacoes": "Maio/Junho"
+        },
+        {
+          "data": "2025-06-10",
+          "tipo": "Pagamento",
+          "descricao": "Restaurante",
           "categoria": "Lazer",
           "valor": 150.00,
           "pago_por": "Ana",
@@ -267,70 +276,6 @@ export default function Dashboard() {
         }
       ];
 
-      console.log('📊 Total de registros do JSON:', dadosJSON.length);
-
-      // Mapeamento de categorias do JSON para IDs do sistema
-      const mapeamentoCategorias = {
-        'Alimentação': '1',
-        'Transporte': '2', 
-        'Moradia': '3',
-        'Saúde': '4',
-        'Lazer': '6',
-        'Renda': '7',
-        'Renda extra': '8'
-      };
-
-      // Processar cada item do JSON
-      const transacoesProcessadas = dadosJSON.map((item, index) => {
-        const categoriaId = mapeamentoCategorias[item.categoria] || '10'; // Default: Outros
-        const tipo = item.tipo === 'Recebimento' ? 'RECEITA' : 'DESPESA';
-        const valor = item.tipo === 'Pagamento' ? -Math.abs(item.valor) : Math.abs(item.valor);
-        
-        return {
-          id: `json-${Date.now()}-${index}`,
-          descricao: item.descricao,
-          descricao_adicional: item.observacoes || '',
-          valor: valor,
-          data: item.data,
-          tipo: tipo,
-          categoria_id: categoriaId,
-          registrado_por: item.pago_por,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        };
-      });
-
-      console.log('✅ Transações processadas:', transacoesProcessadas.length);
-
-      // Obter transações existentes
-      const existingData = localStorage.getItem('zetafin_transactions') || '[]';
-      const existingTransactions = JSON.parse(existingData);
-      console.log('📦 Transações existentes:', existingTransactions.length);
-
-      // Combinar dados
-      const allTransactions = [...existingTransactions, ...transacoesProcessadas];
-      console.log('🔄 Total após combinação:', allTransactions.length);
-
-      // Salvar no localStorage
-      localStorage.setItem('zetafin_transactions', JSON.stringify(allTransactions));
-      console.log('💾 Dados salvos no localStorage');
-
-      // Verificar se foi salvo
-      const savedData = localStorage.getItem('zetafin_transactions');
-      const savedTransactions = JSON.parse(savedData);
-      console.log('✅ Verificação - Total salvo:', savedTransactions.length);
-
-      toast.success(`✅ ${dadosJSON.length} transações reais inseridas com sucesso!`);
-      recarregarDados();
-      
-    } catch (error) {
-      console.error('❌ ERRO:', error);
-      toast.error('Erro ao inserir dados reais: ' + (error instanceof Error ? error.message : 'Erro desconhecido'));
-    }
-  };
-
-  // Função removida - inserção automática desabilitada
-  // const handleInserirDadosFicticios = inserirDadosReaisJSON;
 
   if (loading) {
     return (
@@ -340,11 +285,22 @@ export default function Dashboard() {
     );
   }
 
+
+
   // Últimas 5 transações
-  const ultimasTransacoes = transacoes
+  const ultimasTransacoes = (transacoes || [])
     .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime())
     .slice(0, 5);
 
+  // Agrupar últimas transações por data (YYYY-MM-DD)
+  const gruposPorData = ultimasTransacoes.reduce((acc: Record<string, any[]>, t) => {
+    const key = (t.data || '').split('T')[0];
+    acc[key] = acc[key] ? [...acc[key], t] : [t];
+    return acc;
+  }, {} as Record<string, any[]>);
+  const datasOrdenadasDesc = Object.keys(gruposPorData).sort(
+    (a, b) => new Date(b).getTime() - new Date(a).getTime()
+  );
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -353,7 +309,7 @@ export default function Dashboard() {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR');
+    return DATE_UTILS.formatToBrazilian(dateString);
   };
 
   return (
@@ -364,6 +320,9 @@ export default function Dashboard() {
         <p className="text-gray-600 dark:text-gray-400 text-sm">Visão geral das finanças</p>
       </div>
 
+      {/* Menu de teste removido para focar no layout do Dashboard */}
+
+
       {/* Balance Cards */}
       <div>
         <BalanceCard estatisticas={estatisticas} />
@@ -373,8 +332,6 @@ export default function Dashboard() {
       <div className="space-y-6">
         <ExpensesByCategory />
       </div>
-
-      
 
       {/* Recent Transactions */}
       <div>
@@ -399,35 +356,50 @@ export default function Dashboard() {
         ) : (
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm overflow-hidden">
             <div className="divide-y divide-gray-100 dark:divide-gray-700">
-              {ultimasTransacoes.slice(0, 4).map((transacao) => {
-                const categoria = transacao.categoria || obterCategoria(transacao.categoria_id);
-                return (
-                  <div key={transacao.id} className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 bg-gray-600 dark:bg-gray-500 rounded-full flex items-center justify-center flex-shrink-0">
-                          <span className="text-white text-xs">{categoria?.icone || '📝'}</span>
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <h4 className="font-medium text-gray-900 dark:text-gray-100 text-sm">{transacao.descricao}</h4>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">{categoria?.nome || 'Outros'}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <div className="text-right">
-                          <p className={`font-bold text-sm ${
-                            transacao.tipo === 'RECEITA' ? 'text-green-600' : 'text-red-600'
-                          }`}>
-                            {formatCurrency(transacao.valor)}
-                          </p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">{formatDate(transacao.data)}</p>
-                        </div>
-                      </div>
-                    </div>
+              {datasOrdenadasDesc.map((isoDate) => (
+<div key={isoDate}>
+<div className="px-4 py-2 bg-gray-50 dark:bg-gray-700 text-xs font-semibold text-gray-600 dark:text-gray-300">
+{DATE_UTILS.formatToBrazilian(isoDate)}
                   </div>
-                );
-              })}
-            </div>
+                  <div className="divide-y divide-gray-100 dark:divide-gray-700">
+                    {gruposPorData[isoDate].map((transacao) => {
+                      const categoria = transacao.categoria || obterCategoria(transacao.categoria_id);
+                      return (
+                        <div key={transacao.id} className="p-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-gray-600 dark:bg-gray-500">
+                                <span className="text-white text-xs">{categoria?.icone || '📝'}</span>
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-center space-x-2">
+                                  <h4 className="font-medium text-gray-900 dark:text-gray-100 text-sm">{transacao.descricao}</h4>
+                                </div>
+                                <div className="flex items-center space-x-2 text-xs text-gray-500 dark:text-gray-400">
+                                  <span>{categoria?.nome || 'Outros'}</span>
+                                  <span>•</span>
+                                  <span className={`${transacao.tipo === 'RECEITA' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'} font-medium`}>
+                                    {transacao.tipo === 'RECEITA' ? '+ Receita' : '- Despesa'}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex items-center space-x-3">
+                              <div className="text-right">
+                                <p className={`font-bold text-sm ${transacao.tipo === 'RECEITA' ? 'text-green-600' : 'text-red-600'}`}>
+                                  {formatCurrency(transacao.valor)}
+                                </p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">{formatDate(transacao.data)}</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+               </div>
             
             {/* Link para ver todas as transações */}
             <div className="p-4 bg-gray-50 dark:bg-gray-700 text-center">
@@ -443,4 +415,6 @@ export default function Dashboard() {
       </div>
     </div>
   );
-}
+});
+
+export default Dashboard;

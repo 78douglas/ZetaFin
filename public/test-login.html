@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teste de Login Após Logout</title>
+</head>
+<body>
+    <h1>Testando Login Após Logout...</h1>
+    <div id="status">Simulando login...</div>
+    
+    <script>
+        console.log('=== TESTANDO LOGIN APÓS LOGOUT ===');
+        
+        // Verificar estado antes do login
+        console.log('Estado antes do login:');
+        console.log('- zetafin-local-user:', localStorage.getItem('zetafin-local-user'));
+        console.log('- zetafin-local-session:', localStorage.getItem('zetafin-local-session'));
+        
+        // Simular login criando dados de usuário e sessão
+        console.log('Simulando login...');
+        
+        const mockUser = {
+          id: 'test-user-id',
+          email: 'teste@email.com',
+          user_metadata: {
+            full_name: 'Usuário Teste'
+          }
+        };
+        
+        const mockSession = {
+          access_token: 'mock-access-token',
+          refresh_token: 'mock-refresh-token',
+          expires_at: Date.now() + (24 * 60 * 60 * 1000), // 24 horas
+          user: mockUser
+        };
+        
+        // Salvar dados no localStorage
+        localStorage.setItem('zetafin-local-user', JSON.stringify(mockUser));
+        localStorage.setItem('zetafin-local-session', JSON.stringify(mockSession));
+        
+        console.log('Dados de login salvos no localStorage');
+        
+        // Verificar estado após login
+        console.log('Estado após login:');
+        console.log('- zetafin-local-user:', localStorage.getItem('zetafin-local-user') ? 'existe' : 'não existe');
+        console.log('- zetafin-local-session:', localStorage.getItem('zetafin-local-session') ? 'existe' : 'não existe');
+        
+        document.getElementById('status').innerHTML = 'Login simulado! Redirecionando para dashboard...';
+        
+        // Redirecionar para dashboard
+        setTimeout(() => {
+          window.location.href = '/dashboard';
+        }, 2000);
+    </script>
+</body>
+</html>
